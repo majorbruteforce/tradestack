@@ -1,3 +1,0 @@
-/home/majorbruteforce/codes/tradestack/build/CMakeFiles/tradestack.dir
-/home/majorbruteforce/codes/tradestack/build/CMakeFiles/edit_cache.dir
-/home/majorbruteforce/codes/tradestack/build/CMakeFiles/rebuild_cache.dir
