@@ -1,0 +1,43 @@
+# CMake build directories
+/build/
+/cmake-build-*/
+
+# Binary files
+*.out
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Object files and other intermediates
+*.o
+*.obj
+*.a
+*.lib
+
+# CLion & JetBrains IDE files
+.idea/
+*.iml
+
+# Logs, dumps, etc.
+*.log
+*.trace
+*.core
+
+# Test results or artifacts
+/test-results/
+*.gcda
+*.gcno
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Backup/editor files
+*~
+*.swp
+*.swo
+*.bak
+
+# Generated files (optional, add/remove as per your project)
+*.generated.*
