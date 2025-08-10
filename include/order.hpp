@@ -1,4 +1,5 @@
 #pragma once
+#include <chrono>
 #include <cstdint>
 #include <string>
 #include <utility>
@@ -18,6 +19,9 @@ enum class OrderType
 
 struct Order
 {
+    using Clock     = std::chrono::steady_clock;
+    using TimePoint = std::chrono::time_point<Clock>;
+
     std::string id;
     std::string clientOrderId;
 
@@ -28,6 +32,9 @@ struct Order
     Side      side;
     OrderType type;
 
+    TimePoint     arrivalTime;
+    std::uint64_t arrivalNs;  // for persistence
+
     explicit Order(
             std::string id, std::string cid, std::uint64_t p, std::uint64_t q, Side s, OrderType t)
         : id(std::move(id)),
@@ -37,7 +44,40 @@ struct Order
           side(s),
           type(t)
     {
+        setArrivalNow();
     }
+
+    void setArrivalNow()
+    {
+        arrivalTime = Clock::now();
+        arrivalNs   = static_cast<std::uint64_t>(
+                std::chrono::duration_cast<std::chrono::nanoseconds>(arrivalTime.time_since_epoch())
+                        .count());
+    }
+
+    void setArrivalFromNs(std::uint64_t ns)
+    {
+        arrivalNs   = ns;
+        arrivalTime = TimePoint(std::chrono::nanoseconds(ns));
+    }
+
+    void setPrice(std::uint64_t p) { price = p; }
+    void setRemainingQuantity(std::uint64_t q) { remainingQuantity = q; }
+    void setFilledQuantity(std::uint64_t q) { filledQuantity = q; }
+    void setSide(Side s) { side = s; }
+    void setType(OrderType t) { type = t; }
+    void setClientOrderId(std::string cid) { clientOrderId = std::move(cid); }
+    void setId(std::string oid) { id = std::move(oid); }
+
+    [[nodiscard]] const std::string& getId() const { return id; }
+    [[nodiscard]] const std::string& getClientOrderId() const { return clientOrderId; }
+    [[nodiscard]] std::uint64_t      getPrice() const { return price; }
+    [[nodiscard]] std::uint64_t      getRemainingQuantity() const { return remainingQuantity; }
+    [[nodiscard]] std::uint64_t      getFilledQuantity() const { return filledQuantity; }
+    [[nodiscard]] Side               getSide() const { return side; }
+    [[nodiscard]] OrderType          getType() const { return type; }
+    [[nodiscard]] TimePoint          getArrivalTime() const { return arrivalTime; }
+    [[nodiscard]] std::uint64_t      getArrivalNs() const { return arrivalNs; }
 };
 
 struct OrderRequest
@@ -61,11 +101,13 @@ inline void printOrder(const Order& ord, std::ostream& os = std::cout, std::size
     utils::printField("Remaining Qty", ord.remainingQuantity, width, os);
     utils::printField("Side", (ord.side == Side::Buy ? "Buy" : "Sell"), width, os);
     utils::printField("Type", (ord.type == OrderType::Limit ? "Limit" : "Market"), width, os);
+    utils::printField("ArrivalNs", ord.getArrivalNs(), width, os);
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Order& o)
 {
     return os << '{' << "id=" << o.id << ", cid=" << o.clientOrderId << ", price=" << o.price
               << ", rem=" << o.remainingQuantity << ", side=" << (o.side == Side::Buy ? "B" : "S")
-              << ", type=" << (o.type == OrderType::Limit ? "L" : "M") << '}';
+              << ", type=" << (o.type == OrderType::Limit ? "L" : "M")
+              << ", arrivalNs=" << o.getArrivalNs() << '}';
 }

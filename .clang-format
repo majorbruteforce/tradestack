@@ -1,24 +1,19 @@
 BasedOnStyle: Google
 Language: Cpp
 
-# Indentation
 IndentWidth: 4
 ContinuationIndentWidth: 8
 UseTab: Never
 
-# Line control
 ColumnLimit: 100
 AllowShortBlocksOnASingleLine: false
-AllowShortFunctionsOnASingleLine: Empty
-
-# Initializer alignment
-AlignArrayOfStructures: Right  # aligns items in initializer list like a table
-BinPackArguments: false        # puts args one-per-line when multi-line
+AllowShortFunctionsOnASingleLine: InlineOnly
+BinPackArguments: false
 BinPackParameters: false
 PenaltyBreakAssignment: 10
 PenaltyBreakBeforeFirstCallParameter: 1
 
-# Brace wrapping to make bodies visible
+AlignArrayOfStructures: Right
 BreakBeforeBraces: Custom
 BraceWrapping:
   AfterClass: true
@@ -33,7 +28,6 @@ BraceWrapping:
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
 
-# Includes
 IncludeBlocks: Preserve
 SortIncludes: true
 IncludeCategories:
@@ -42,7 +36,6 @@ IncludeCategories:
   - Regex: '^".*'
     Priority: 2
 
-# Other
 AlignOperands: true
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
