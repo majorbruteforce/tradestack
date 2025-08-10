@@ -1,0 +1,50 @@
+BasedOnStyle: Google
+Language: Cpp
+
+# Indentation
+IndentWidth: 4
+ContinuationIndentWidth: 8
+UseTab: Never
+
+# Line control
+ColumnLimit: 100
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+
+# Initializer alignment
+AlignArrayOfStructures: Right  # aligns items in initializer list like a table
+BinPackArguments: false        # puts args one-per-line when multi-line
+BinPackParameters: false
+PenaltyBreakAssignment: 10
+PenaltyBreakBeforeFirstCallParameter: 1
+
+# Brace wrapping to make bodies visible
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterStruct: true
+  AfterNamespace: true
+  AfterUnion: true
+  BeforeElse: true
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+
+# Includes
+IncludeBlocks: Preserve
+SortIncludes: true
+IncludeCategories:
+  - Regex: '^<.*'
+    Priority: 1
+  - Regex: '^".*'
+    Priority: 2
+
+# Other
+AlignOperands: true
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignTrailingComments: true
+SpacesInConditionalStatement: true
