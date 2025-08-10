@@ -2,27 +2,20 @@
 
 #include "../include/order.hpp"
 
-int main() {
-  OrderRequest req{
+int main()
+{
+    OrderRequest req{
 
+            "ORD123",
 
+            "RELIANCE-EQ",
+            Side::Buy,
 
+            OrderType::Limit,
+            263500,
+            25};
+    Order *o = createOrder(req);
+    printOrder(*o);
 
-
-      "ORD123",
-
-
-
-      "RELIANCE-EQ", Side::Buy,
-
-
-
-
-
-
-      OrderType::Limit, 263500,        25};
-  Order *o =                createOrder(req);
-  printOrder(*o);
-
-  return 0;
+    return 0;
 }

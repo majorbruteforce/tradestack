@@ -1,0 +1,11 @@
+{
+    "C_Cpp.clang_format_style": "file",
+    "C_Cpp.formatting": "clangFormat",
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+    "[c]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+    "editor.formatOnSave": true
+}
