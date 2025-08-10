@@ -33,3 +33,8 @@ in the same price level. A deque allows ordered access and FIFO abilities.
 
 Final verdict: **BST** + **deque**
 
+### Makers/Takers
+- **Market** orders don't enter the book. They are either fully/partially filled or rejected(lack of liquidity). They are _takers_.
+- **Limit** orders are stored in the book and provide liquidity. They are _makers_.
+
+

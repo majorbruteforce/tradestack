@@ -1,4 +1,4 @@
-# TradeStack
+#TradeStack
 
 A simple and fast implementation of an order book in C++ for 
 back testing, simulations and real-time trading applications.
