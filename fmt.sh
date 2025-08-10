@@ -2,7 +2,7 @@
 
 set -e
 
-if [ "$1" == "all" ]; then
+if [ "$1" == "all" ] || [ -z "$1" ]; then
     echo "Formatting all C++ source/header files..."
     clang-format -i $(find src include -type f \( -name "*.cpp" -o -name "*.hpp" -o -name "*.h" \))
     echo "✅ All files formatted."
