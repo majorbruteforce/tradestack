@@ -8,8 +8,10 @@ struct PriceLevelNode
     uint64_t          price;
     std::deque<Order> level;
 
-    PriceLevelNode *left  = nullptr;
-    PriceLevelNode *right = nullptr;
+    uint64_t        height = 0;
+    PriceLevelNode *left   = nullptr;
+    PriceLevelNode *right  = nullptr;
 
     explicit PriceLevelNode(const uint64_t p) : price(p) {}
+    int balance() { return (left ? left->height : 0) - (right ? right->height : 0); }
 };

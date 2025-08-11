@@ -27,6 +27,7 @@ chmod +x ./scripts/run_tests.sh
 - [ ] Price-time priority matching
 - [ ] Order cancellation and modification
 - [ ] Real-time top-of-book retrieval
+- [ ] Time series order regeneration and retrieval 
 
 ### FIX Engine
 

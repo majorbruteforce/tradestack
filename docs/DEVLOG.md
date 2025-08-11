@@ -37,4 +37,7 @@ Final verdict: **BST** + **deque**
 - **Market** orders don't enter the book. They are either fully/partially filled or rejected(lack of liquidity). They are _takers_.
 - **Limit** orders are stored in the book and provide liquidity. They are _makers_.
 
+### Using AVL Trees
+- The **BSTs** need to be balanced to ensure that the trees don't have linearity.
+- 
 

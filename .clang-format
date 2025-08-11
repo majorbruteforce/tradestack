@@ -40,4 +40,4 @@ AlignOperands: true
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
 AlignTrailingComments: true
-SpacesInConditionalStatement: true
+SpacesInConditionalStatement: false
