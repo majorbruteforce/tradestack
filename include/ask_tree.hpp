@@ -17,8 +17,5 @@ class AskTree : public PriceLevelTree
         }
     }
 
-    bool isEmpty() const override
-    {
-        return root == nullptr;
-    }
+    bool isEmpty() const override { return root == nullptr; }
 };
