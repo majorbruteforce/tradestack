@@ -3,8 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <utility>
-
-#include "utils/print_utils.hpp"
+#include <utils/print_utils.hpp>
 
 enum class Side
 {

@@ -1,6 +1,6 @@
-#include <side_tree.hpp>
 #include <order.hpp>
+#include <side_tree.hpp>
 
-class SideTreeFactory {
-    
+class SideTreeFactory
+{
 };

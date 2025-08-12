@@ -1,5 +1,4 @@
 #include <functional>
-
 #include <side_tree.hpp>
 
 PriceLevelNode* SideTree::insert(const Order& order)

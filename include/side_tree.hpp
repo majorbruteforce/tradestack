@@ -1,12 +1,11 @@
 #pragma once
+#include <avl_tree.hpp>
 #include <functional>
+#include <price_level_node.hpp>
 #include <string>
 #include <vector>
-#include "price_level_node.hpp"
 
-#include <avl_tree.hpp>
-
-class SideTree : public AVLTree<PriceLevelNode>
+class SideTree
 {
    protected:
     PriceLevelNode*                     root;

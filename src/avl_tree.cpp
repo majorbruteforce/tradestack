@@ -1,5 +1,4 @@
-#include<algorithm>
-
+#include <algorithm>
 #include <avl_tree.hpp>
 
 template <typename NodeType>
