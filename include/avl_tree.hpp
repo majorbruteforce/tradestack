@@ -1,8 +1,7 @@
 #pragma once
 #include <algorithm>
 template <typename NodeType>
-class AVLTree
-{
+class AVLTree {
    public:
     NodeType* rotateLeft(NodeType* node);
     NodeType* rotateRight(NodeType* node);
@@ -15,26 +14,22 @@ class AVLTree
 };
 
 template <typename NodeType>
-int AVLTree<NodeType>::height(NodeType* node)
-{
+int AVLTree<NodeType>::height(NodeType* node) {
     return node ? node->height : 0;
 }
 
 template <typename NodeType>
-int AVLTree<NodeType>::balanceFactor(NodeType* node)
-{
+int AVLTree<NodeType>::balanceFactor(NodeType* node) {
     return height(node->left) - height(node->right);
 }
 
 template <typename NodeType>
-void AVLTree<NodeType>::updateHeight(NodeType* node)
-{
+void AVLTree<NodeType>::updateHeight(NodeType* node) {
     node->height = 1 + std::max(height(node->left), height(node->right));
 }
 
 template <typename NodeType>
-NodeType* AVLTree<NodeType>::rotateLeft(NodeType* node)
-{
+NodeType* AVLTree<NodeType>::rotateLeft(NodeType* node) {
     NodeType* newRoot      = node->right;
     NodeType* movedSubtree = newRoot->left;
 
@@ -48,8 +43,7 @@ NodeType* AVLTree<NodeType>::rotateLeft(NodeType* node)
 }
 
 template <typename NodeType>
-NodeType* AVLTree<NodeType>::rotateRight(NodeType* node)
-{
+NodeType* AVLTree<NodeType>::rotateRight(NodeType* node) {
     NodeType* newRoot      = node->left;
     NodeType* movedSubtree = newRoot->right;
 

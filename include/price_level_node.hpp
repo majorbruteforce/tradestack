@@ -3,8 +3,7 @@
 
 #include <order.hpp>
 
-struct PriceLevelNode
-{
+struct PriceLevelNode {
     uint64_t          price;
     std::deque<Order> level;
 

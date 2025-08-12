@@ -5,20 +5,11 @@
 #include <utility>
 #include <utils/print_utils.hpp>
 
-enum class Side
-{
-    Buy,
-    Sell
-};
+enum class Side { Buy, Sell };
 
-enum class OrderType
-{
-    Market,
-    Limit
-};
+enum class OrderType { Market, Limit };
 
-struct Order
-{
+struct Order {
     using Clock     = std::chrono::steady_clock;
     using TimePoint = std::chrono::time_point<Clock>;
 
@@ -42,21 +33,18 @@ struct Order
           price(p),
           remainingQuantity(q),
           side(s),
-          type(t)
-    {
+          type(t) {
         setArrivalNow();
     }
 
-    void setArrivalNow()
-    {
+    void setArrivalNow() {
         arrivalTime = Clock::now();
         arrivalNs   = static_cast<std::uint64_t>(
                 std::chrono::duration_cast<std::chrono::nanoseconds>(arrivalTime.time_since_epoch())
                         .count());
     }
 
-    void setArrivalFromNs(std::uint64_t ns)
-    {
+    void setArrivalFromNs(std::uint64_t ns) {
         arrivalNs   = ns;
         arrivalTime = TimePoint(std::chrono::nanoseconds(ns));
     }
@@ -80,8 +68,7 @@ struct Order
     [[nodiscard]] std::uint64_t      getArrivalNs() const { return arrivalNs; }
 };
 
-struct OrderRequest
-{
+struct OrderRequest {
     std::string   clientOrderId;
     std::string   symbol;
     Side          side;
@@ -92,8 +79,7 @@ struct OrderRequest
 
 Order* createOrder(const OrderRequest& req);
 
-inline void printOrder(const Order& ord, std::ostream& os = std::cout, std::size_t width = 15)
-{
+inline void printOrder(const Order& ord, std::ostream& os = std::cout, std::size_t width = 15) {
     utils::printField("ID", ord.id, width, os);
     utils::printField("Client ID", ord.clientOrderId, width, os);
     utils::printField("Price", ord.price, width, os);
@@ -104,8 +90,7 @@ inline void printOrder(const Order& ord, std::ostream& os = std::cout, std::size
     utils::printField("ArrivalNs", ord.getArrivalNs(), width, os);
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Order& o)
-{
+inline std::ostream& operator<<(std::ostream& os, const Order& o) {
     return os << '{' << "id=" << o.id << ", cid=" << o.clientOrderId << ", price=" << o.price
               << ", rem=" << o.remainingQuantity << ", side=" << (o.side == Side::Buy ? "B" : "S")
               << ", type=" << (o.type == OrderType::Limit ? "L" : "M")
