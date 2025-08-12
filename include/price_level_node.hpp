@@ -13,5 +13,4 @@ struct PriceLevelNode
     PriceLevelNode *right  = nullptr;
 
     explicit PriceLevelNode(const uint64_t p) : price(p) {}
-    int balance() { return (left ? left->height : 0) - (right ? right->height : 0); }
 };
