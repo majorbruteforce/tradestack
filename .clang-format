@@ -16,14 +16,14 @@ PenaltyBreakBeforeFirstCallParameter: 1
 AlignArrayOfStructures: Right
 BreakBeforeBraces: Custom
 BraceWrapping:
-  AfterClass: true
-  AfterControlStatement: true
-  AfterEnum: true
-  AfterFunction: true
-  AfterStruct: true
-  AfterNamespace: true
-  AfterUnion: true
-  BeforeElse: true
+  AfterClass: false
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterFunction: false
+  AfterStruct: false
+  AfterNamespace: false
+  AfterUnion: false
+  BeforeElse: false
   SplitEmptyFunction: true
   SplitEmptyRecord: true
   SplitEmptyNamespace: true

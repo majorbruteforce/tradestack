@@ -24,10 +24,13 @@ chmod +x ./scripts/run_tests.sh
 ### Order Book Engine
 
 - [ ] Submitting limit and market orders
+  - [x] AVL helpers for BST balancing
+  - [ ] Self-balancing BST for sides
+  - [ ] Insertion and Deletion in BST
 - [ ] Price-time priority matching
 - [ ] Order cancellation and modification
 - [ ] Real-time top-of-book retrieval
-- [ ] Time series order regeneration and retrieval 
+- [ ] Time series order regeneration and retrieval
 
 ### FIX Engine
 
@@ -41,6 +44,7 @@ chmod +x ./scripts/run_tests.sh
 ### Testing
 
 - [ ] Unit tests for order book
+  - [x] AVL helpers (rotation and height)
 - [ ] Unit tests for FIX parser
 - [ ] Benchmarking and profiling utilities
 - [x] Build system with CMake
