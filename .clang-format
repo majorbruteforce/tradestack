@@ -8,6 +8,7 @@ UseTab: Never
 ColumnLimit: 100
 AllowShortBlocksOnASingleLine: false
 AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortIfStatementsOnASingleLine: Never
 BinPackArguments: false
 BinPackParameters: false
 PenaltyBreakAssignment: 10
