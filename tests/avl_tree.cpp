@@ -1,39 +1,32 @@
 #include <avl_tree.hpp>
 #include <gtest/gtest.h>
 
-class AVLTreeTest : public ::testing::Test
-{
+class AVLTreeTest : public ::testing::Test {
    protected:
-    struct MockNode
-    {
+    struct MockNode {
         int       key;
         int       height;
         MockNode* left;
         MockNode* right;
 
         MockNode(int k, MockNode* l = nullptr, MockNode* r = nullptr)
-            : key(k), height(1), left(l), right(r)
-        {
-        }
+            : key(k), height(1), left(l), right(r) {}
     };
 
     AVLTree<MockNode> avl;
 
-    MockNode* makeNode(int key, MockNode* left = nullptr, MockNode* right = nullptr)
-    {
+    MockNode* makeNode(int key, MockNode* left = nullptr, MockNode* right = nullptr) {
         return new MockNode(key, left, right);
     }
 };
 
-TEST_F(AVLTreeTest, HeightWorks)
-{
+TEST_F(AVLTreeTest, HeightWorks) {
     MockNode* n = makeNode(10);
     EXPECT_EQ(avl.height(n), 1) << "Height of a leaf node (key=" << n->key << ") should be 1.";
     delete n;
 }
 
-TEST_F(AVLTreeTest, UpdateHeightWorks)
-{
+TEST_F(AVLTreeTest, UpdateHeightWorks) {
     MockNode* m = makeNode(20);
     MockNode* n = makeNode(10, m);
 
@@ -46,8 +39,7 @@ TEST_F(AVLTreeTest, UpdateHeightWorks)
     delete n;
 }
 
-TEST_F(AVLTreeTest, BalanceFactorWorks)
-{
+TEST_F(AVLTreeTest, BalanceFactorWorks) {
     MockNode* left  = makeNode(10);
     MockNode* right = makeNode(5);
     MockNode* root  = makeNode(2, left, right);
@@ -71,8 +63,7 @@ TEST_F(AVLTreeTest, BalanceFactorWorks)
     delete root;
 }
 
-TEST_F(AVLTreeTest, RightRotationWorks)
-{
+TEST_F(AVLTreeTest, RightRotationWorks) {
     MockNode* c = makeNode(10);
     MockNode* b = makeNode(20, c);
     MockNode* a = makeNode(30, b);
@@ -90,8 +81,7 @@ TEST_F(AVLTreeTest, RightRotationWorks)
     delete c;
 }
 
-TEST_F(AVLTreeTest, LeftRotationWorks)
-{
+TEST_F(AVLTreeTest, LeftRotationWorks) {
     MockNode* c = makeNode(10);
     MockNode* b = makeNode(20, nullptr, c);
     MockNode* a = makeNode(30, nullptr, b);
@@ -109,8 +99,7 @@ TEST_F(AVLTreeTest, LeftRotationWorks)
     delete c;
 }
 
-TEST_F(AVLTreeTest, LeftRightRotationWorks)
-{
+TEST_F(AVLTreeTest, LeftRightRotationWorks) {
     MockNode* n20 = makeNode(20);
     MockNode* n10 = makeNode(10, nullptr, n20);
     MockNode* n30 = makeNode(30, n10, nullptr);
@@ -128,13 +117,12 @@ TEST_F(AVLTreeTest, LeftRightRotationWorks)
     delete n30;
 }
 
-TEST_F(AVLTreeTest, RightLeftRotationWorks)
-{
+TEST_F(AVLTreeTest, RightLeftRotationWorks) {
     MockNode* n20 = makeNode(20);
     MockNode* n30 = makeNode(30, n20, nullptr);
     MockNode* n10 = makeNode(10, nullptr, n30);
 
-    n10->right = avl.rotateRight(n30);
+    n10->right        = avl.rotateRight(n30);
     MockNode* newRoot = avl.rotateLeft(n10);
 
     EXPECT_EQ(newRoot, n20) << "After RL rotation, new root should be 20.";
@@ -144,4 +132,86 @@ TEST_F(AVLTreeTest, RightLeftRotationWorks)
     delete n10;
     delete n20;
     delete n30;
+}
+
+TEST_F(AVLTreeTest, BalanceWorks) {
+    {
+        MockNode* n10 = makeNode(10);
+        avl.updateHeight(n10);
+
+        MockNode* n20 = makeNode(20, n10);
+        avl.updateHeight(n20);
+
+        MockNode* n30 = makeNode(30, n20);
+        avl.updateHeight(n30);
+
+        MockNode* newRoot = avl.balance(n30);
+        EXPECT_EQ(newRoot, n20) << "LL case: root should be 20 after balancing.";
+        EXPECT_EQ(newRoot->left, n10) << "LL case: left child of root should be 10.";
+        EXPECT_EQ(newRoot->right, n30) << "LL case: right child of root should be 30.";
+
+        delete n10;
+        delete n20;
+        delete n30;
+    }
+
+    {
+        MockNode* n40 = makeNode(40);
+        avl.updateHeight(n40);
+
+        MockNode* n30 = makeNode(30, nullptr, n40);
+        avl.updateHeight(n30);
+
+        MockNode* n20 = makeNode(20, nullptr, n30);
+        avl.updateHeight(n20);
+
+        MockNode* newRoot = avl.balance(n20);
+        EXPECT_EQ(newRoot, n30) << "RR case: root should be 30 after balancing.";
+        EXPECT_EQ(newRoot->left, n20) << "RR case: left child of root should be 20.";
+        EXPECT_EQ(newRoot->right, n40) << "RR case: right child of root should be 40.";
+
+        delete n20;
+        delete n30;
+        delete n40;
+    }
+
+    {
+        MockNode* n20 = makeNode(20);
+        avl.updateHeight(n20);
+
+        MockNode* n10 = makeNode(10, nullptr, n20);
+        avl.updateHeight(n10);
+
+        MockNode* n30 = makeNode(30, n10, nullptr);
+        avl.updateHeight(n30);
+
+        MockNode* newRoot = avl.balance(n30);
+        EXPECT_EQ(newRoot, n20) << "LR case: root should be 20 after balancing.";
+        EXPECT_EQ(newRoot->left, n10) << "LR case: left child of root should be 10.";
+        EXPECT_EQ(newRoot->right, n30) << "LR case: right child of root should be 30.";
+
+        delete n10;
+        delete n20;
+        delete n30;
+    }
+
+    {
+        MockNode* n20 = makeNode(20);
+        avl.updateHeight(n20);
+
+        MockNode* n30 = makeNode(30, n20, nullptr);
+        avl.updateHeight(n30);
+
+        MockNode* n10 = makeNode(10, nullptr, n30);
+        avl.updateHeight(n10);
+
+        MockNode* newRoot = avl.balance(n10);
+        EXPECT_EQ(newRoot, n20) << "RL case: root should be 20 after balancing.";
+        EXPECT_EQ(newRoot->left, n10) << "RL case: left child of root should be 10.";
+        EXPECT_EQ(newRoot->right, n30) << "RL case: right child of root should be 30.";
+
+        delete n10;
+        delete n20;
+        delete n30;
+    }
 }
