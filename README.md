@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/banner-light.png" alt="Banner" width="850">
+  <img src="docs/assets/banner-dark.png" alt="Banner" width="850">
 </p>
 
 A simple and fast implementation of an order book in C++ for
