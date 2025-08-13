@@ -1,4 +1,6 @@
-# TradeStack
+<p align="center">
+  <img src="docs/assets/banner.png" alt="Banner" width="850">
+</p>
 
 A simple and fast implementation of an order book in C++ for
 back testing, simulations and real-time trading applications.
