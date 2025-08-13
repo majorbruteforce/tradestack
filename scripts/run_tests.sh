@@ -12,4 +12,13 @@ cmake -S . -B "$BUILD_DIR"
 cmake --build "$BUILD_DIR"
 
 cd "$BUILD_DIR"
-GTEST_COLOR="$TEST_CLR" ctest --output-on-failure
+
+if [ $# -eq 0 ]; then
+    echo "===== Running all tests ====="
+    GTEST_COLOR="$TEST_CLR" ctest --output-on-failure
+else
+    for test_name in "$@"; do
+        echo -e "\n===== Running only: $test_name ====="
+        GTEST_COLOR="$TEST_CLR" ctest -R "^${test_name}$" --output-on-failure
+    done
+fi
