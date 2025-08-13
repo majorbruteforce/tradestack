@@ -16,7 +16,7 @@ chmod +x ./scripts/run.sh
 
 ```bash
 chmod +x ./scripts/run_tests.sh
-./scripts/run_tests.sh
+./scripts/run_tests.sh [<testname>]
 ```
 
 ## Features
@@ -45,6 +45,7 @@ chmod +x ./scripts/run_tests.sh
 
 - [ ] Unit tests for order book
   - [x] AVL helpers (rotation and height)
+- [ ] Segregate tests  
 - [ ] Unit tests for FIX parser
 - [ ] Benchmarking and profiling utilities
 - [x] Build system with CMake
