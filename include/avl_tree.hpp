@@ -14,6 +14,7 @@ class AVLTree {
     void      inorder(NodeType* root, std::function<void(NodeType*)> func);
     NodeType* insert(NodeType* root, uint64_t price);
     NodeType* remove(NodeType* root, uint64_t price);
+    void      freeTree(NodeType* root);
 };
 
 template <typename NodeType>
@@ -105,4 +106,13 @@ NodeType* AVLTree<NodeType>::insert(NodeType* root, uint64_t price) {
     }
 
     return balance(root);
+}
+
+template <typename NodeType>
+void AVLTree<NodeType>::freeTree(NodeType* root) {
+    if (!root)
+        return;
+    freeTree(root->left);
+    freeTree(root->right);
+    delete root;
 }
