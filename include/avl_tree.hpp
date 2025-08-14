@@ -11,8 +11,9 @@ class AVLTree {
     NodeType* balance(NodeType* node);
     void      updateHeight(NodeType* node);
 
-    AVLTree() {}
-    virtual ~AVLTree() = default;
+    void      inorder(NodeType* root, std::function<void(NodeType*)> func);
+    NodeType* insert(NodeType* root, uint64_t price);
+    NodeType* remove(NodeType* root, uint64_t price);
 };
 
 template <typename NodeType>
@@ -76,4 +77,32 @@ NodeType* AVLTree<NodeType>::balance(NodeType* node) {
 template <typename NodeType>
 void AVLTree<NodeType>::updateHeight(NodeType* node) {
     node->height = 1 + std::max(height(node->left), height(node->right));
+}
+
+template <typename NodeType>
+void AVLTree<NodeType>::inorder(NodeType* root, std::function<void(NodeType*)> func) {
+    std::function<void(NodeType*)> recurse = [&](NodeType* node) {
+        if (!node)
+            return;
+        recurse(node->left);
+        func(node);
+        recurse(node->right);
+    };
+    recurse(root);
+}
+
+template <typename NodeType>
+NodeType* AVLTree<NodeType>::insert(NodeType* root, uint64_t price) {
+    if (!root)
+        return new NodeType(price);
+
+    if (price < root->price) {
+        root->left = AVLTree<NodeType>::insert(root->left, price);
+    } else if (price > root->price) {
+        root->right = AVLTree<NodeType>::insert(root->right, price);
+    } else {
+        return root;
+    }
+
+    return balance(root);
 }

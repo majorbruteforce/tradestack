@@ -4,25 +4,25 @@
 class AVLTreeTest : public ::testing::Test {
    protected:
     struct MockNode {
-        int       key;
+        int       price;
         int       height;
         MockNode* left;
         MockNode* right;
 
         MockNode(int k, MockNode* l = nullptr, MockNode* r = nullptr)
-            : key(k), height(1), left(l), right(r) {}
+            : price(k), height(1), left(l), right(r) {}
     };
 
     AVLTree<MockNode> avl;
 
-    MockNode* makeNode(int key, MockNode* left = nullptr, MockNode* right = nullptr) {
-        return new MockNode(key, left, right);
+    MockNode* makeNode(int price, MockNode* left = nullptr, MockNode* right = nullptr) {
+        return new MockNode(price, left, right);
     }
 };
 
 TEST_F(AVLTreeTest, HeightWorks) {
     MockNode* n = makeNode(10);
-    EXPECT_EQ(avl.height(n), 1) << "Height of a leaf node (key=" << n->key << ") should be 1.";
+    EXPECT_EQ(avl.height(n), 1) << "Height of a leaf node (price=" << n->price << ") should be 1.";
     delete n;
 }
 
@@ -30,9 +30,9 @@ TEST_F(AVLTreeTest, UpdateHeightWorks) {
     MockNode* m = makeNode(20);
     MockNode* n = makeNode(10, m);
 
-    EXPECT_EQ(avl.height(n), 1) << "Initial height of node (key=" << n->key << ") should be 1.";
+    EXPECT_EQ(avl.height(n), 1) << "Initial height of node (price=" << n->price << ") should be 1.";
     avl.updateHeight(n);
-    EXPECT_EQ(avl.height(n), 2) << "Height after adding one child to node (key=" << n->key
+    EXPECT_EQ(avl.height(n), 2) << "Height after adding one child to node (price=" << n->price
                                 << ") should be 2.";
 
     delete m;
@@ -70,11 +70,11 @@ TEST_F(AVLTreeTest, RightRotationWorks) {
 
     avl.rotateRight(a);
 
-    EXPECT_EQ(b->left, c) << "Left Child of node(key = " << b->key
-                          << " ) after rotation should be node(key = " << c->key;
+    EXPECT_EQ(b->left, c) << "Left Child of node(price = " << b->price
+                          << " ) after rotation should be node(price = " << c->price;
 
-    EXPECT_EQ(b->right, a) << "Right Child of node(key = " << b->key
-                           << " ) after rotation should be node(key = " << a->key;
+    EXPECT_EQ(b->right, a) << "Right Child of node(price = " << b->price
+                           << " ) after rotation should be node(price = " << a->price;
 
     delete a;
     delete b;
@@ -88,11 +88,11 @@ TEST_F(AVLTreeTest, LeftRotationWorks) {
 
     avl.rotateLeft(a);
 
-    EXPECT_EQ(b->right, c) << "Right Child of node(key = " << b->key
-                           << " ) after rotation should be node(key = " << c->key;
+    EXPECT_EQ(b->right, c) << "Right Child of node(price = " << b->price
+                           << " ) after rotation should be node(price = " << c->price;
 
-    EXPECT_EQ(b->left, a) << "Left Child of node(key = " << b->key
-                          << " ) after rotation should be node(key = " << a->key;
+    EXPECT_EQ(b->left, a) << "Left Child of node(price = " << b->price
+                          << " ) after rotation should be node(price = " << a->price;
 
     delete a;
     delete b;
@@ -214,4 +214,37 @@ TEST_F(AVLTreeTest, BalanceWorks) {
         delete n20;
         delete n30;
     }
+}
+
+TEST_F(AVLTreeTest, InsertWorks) {
+    MockNode* root = nullptr;
+    root           = avl.insert(root, 50);
+    root           = avl.insert(root, 30);
+    root           = avl.insert(root, 10);
+
+    EXPECT_EQ(root->price, 30);
+    EXPECT_EQ(root->left->price, 10);
+    EXPECT_EQ(root->right->price, 50);
+
+    root = avl.insert(root, 20);
+    root = avl.insert(root, 25);
+
+    EXPECT_EQ(root->price, 30);
+    EXPECT_EQ(root->left->price, 20);
+    EXPECT_EQ(root->right->price, 50);
+    EXPECT_EQ(root->left->left->price, 10);
+    EXPECT_EQ(root->left->right->price, 25);
+
+    MockNode* oldRoot = root;
+    root              = avl.insert(root, 30);
+    EXPECT_EQ(root, oldRoot);
+
+    std::function<void(MockNode*)> deleteTree = [&](MockNode* node) {
+        if (!node)
+            return;
+        deleteTree(node->left);
+        deleteTree(node->right);
+        delete node;
+    };
+    deleteTree(root);
 }
