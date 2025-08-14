@@ -4,8 +4,8 @@
 #include <order.hpp>
 
 struct PriceLevelNode {
-    uint64_t          price;
-    std::deque<Order> level;
+    uint64_t            price;
+    std::deque<Order *> level;
 
     uint64_t        height = 0;
     PriceLevelNode *left   = nullptr;

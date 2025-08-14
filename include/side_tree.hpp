@@ -2,6 +2,7 @@
 
 #include <avl_tree.hpp>
 #include <functional>
+#include <price_level_node.hpp>
 #include <string>
 #include <vector>
 
@@ -19,25 +20,35 @@ class SideTree {
 
     virtual ~SideTree() = default;
 
-    virtual NodeType*           insert(const Order& order);
+    virtual NodeType*           insert(Order& order);
     virtual NodeType*           remove(const std::string& orderId);
-    virtual NodeType*           find(const std::string& orderId);
+    virtual NodeType*           find(const int& price);
     virtual std::vector<Order*> top(int length = 1) const;
 
     size_t size() const { return orderCount; }
     bool   empty() const { return orderCount == 0; }
-
-    void inorder(std::function<void(NodeType*)> func);
 };
 
 template <typename NodeType>
-NodeType* SideTree<NodeType>::insert(const Order& order) {
+NodeType* SideTree<NodeType>::insert(Order& order) {
+    uint64_t price = order.price;
+
     if (!root) {
-        root = new NodeType(order.price);
+        root = new NodeType(price);
         best = root;
         orderCount++;
         return root;
     }
+
+    NodeType* found = SideTree<NodeType>::find(price);
+    if (found) {
+        found->level.push_back(&order);
+        return found;
+    }
+
+    NodeType* newNode = new NodeType(price);
+    newNode->level.push_back(&order);
+
     return nullptr;
 }
 
@@ -47,22 +58,26 @@ NodeType* SideTree<NodeType>::remove(const std::string& orderId) {
 }
 
 template <typename NodeType>
-NodeType* SideTree<NodeType>::find(const std::string& orderId) {
+NodeType* SideTree<NodeType>::find(const int& price) {
+    if (!root)
+        return nullptr;
+
+    NodeType* node = root;
+
+    while (node) {
+        if (price > node->price) {
+            node = node->right;
+        } else if (price < node->price) {
+            node = node->left;
+        } else {
+            return node;
+        }
+    }
+
     return nullptr;
 }
 
 template <typename NodeType>
 std::vector<Order*> SideTree<NodeType>::top(int length) const {
     return {};
-}
-
-template <typename NodeType>
-void SideTree<NodeType>::inorder(std::function<void(NodeType*)> func) {
-    std::function<void(NodeType*)> recurse = [&](NodeType* node) {
-        if (!node) return;
-        recurse(node->left);
-        func(node);
-        recurse(node->right);
-    };
-    recurse(root);
 }
