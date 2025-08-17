@@ -30,8 +30,13 @@ A **BST** allows all of these:
 This can be further combined with a **deque** for each node to store all orders
 in the same price level. A deque allows ordered access and FIFO abilities.
 
-
 Final verdict: **BST** + **deque**
+
+[17.08.25]
+
+Using **list** instead of **deque** to enable O(1) order cancellaions.
+
+In use: **BST** + **list**
 
 ### Makers/Takers
 - **Market** orders don't enter the book. They are either fully/partially filled or rejected(lack of liquidity). They are _takers_.

@@ -5,11 +5,11 @@
 class SideTreeTest : public ::testing::Test {
    protected:
     struct MockNode {
-        int                price;
-        int                height;
-        std::deque<Order*> level;
-        MockNode*          left;
-        MockNode*          right;
+        int               price;
+        int               height;
+        std::list<Order*> level;
+        MockNode*         left;
+        MockNode*         right;
 
         MockNode(int k, MockNode* l = nullptr, MockNode* r = nullptr)
             : price(k), height(1), left(l), right(r) {}
