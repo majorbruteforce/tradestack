@@ -217,17 +217,19 @@ TEST_F(AVLTreeTest, BalanceWorks) {
 }
 
 TEST_F(AVLTreeTest, InsertWorks) {
-    MockNode* root = nullptr;
-    root           = avl.insert(root, 50);
-    root           = avl.insert(root, 30);
-    root           = avl.insert(root, 10);
+    MockNode* root     = nullptr;
+    MockNode* inserted = nullptr;
+
+    root = avl.insert(root, 50, inserted);
+    root = avl.insert(root, 30, inserted);
+    root = avl.insert(root, 10, inserted);
 
     EXPECT_EQ(root->price, 30);
     EXPECT_EQ(root->left->price, 10);
     EXPECT_EQ(root->right->price, 50);
 
-    root = avl.insert(root, 20);
-    root = avl.insert(root, 25);
+    root = avl.insert(root, 20, inserted);
+    root = avl.insert(root, 25, inserted);
 
     EXPECT_EQ(root->price, 30);
     EXPECT_EQ(root->left->price, 20);
@@ -236,8 +238,10 @@ TEST_F(AVLTreeTest, InsertWorks) {
     EXPECT_EQ(root->left->right->price, 25);
 
     MockNode* oldRoot = root;
-    root              = avl.insert(root, 30);
+    root              = avl.insert(root, 30, inserted);
+
     EXPECT_EQ(root, oldRoot);
+    EXPECT_EQ(inserted, oldRoot);
 
     std::function<void(MockNode*)> deleteTree = [&](MockNode* node) {
         if (!node)

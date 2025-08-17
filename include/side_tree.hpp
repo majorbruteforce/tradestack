@@ -37,19 +37,24 @@ NodeType* SideTree<NodeType>::insert(Order& order) {
         root = new NodeType(price);
         best = root;
         orderCount++;
+        root->level.push_back(&order);
+
         return root;
     }
 
-    NodeType* found = SideTree<NodeType>::find(price);
+    NodeType* found = find(price);
     if (found) {
         found->level.push_back(&order);
         return found;
     }
 
-    NodeType* newNode = new NodeType(price);
-    newNode->level.push_back(&order);
+    NodeType* inserted = nullptr;
+    NodeType* newRoot  = avl.insert(root, price, inserted);
+    root               = newRoot;
 
-    return nullptr;
+    inserted->level.push_back(&order);
+
+    return inserted;
 }
 
 template <typename NodeType>
