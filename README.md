@@ -27,11 +27,26 @@ chmod +x ./scripts/run_tests.sh
 
 - [ ] Submitting limit and market orders
   - [x] AVL helpers for BST balancing
-  - [ ] Self-balancing BST for sides
-  - [ ] Insertion and Deletion in BST
-- [ ] Price-time priority matching
-- [ ] Order cancellation and modification
-- [ ] Real-time top-of-book retrieval
+  - [x] Self-balancing BST for sides
+  - [ ] Insertion in BST
+  - [ ] Deletion in BST
+  - [ ] Inorder access in BST
+  - [ ] Order Modification
+- [ ] Matching limit orders, market orders
+  - [ ] Price-time priority matching
+  - [ ] Order Status Events
+    - [ ] Accepted/Rejected
+    - [ ] Partially Filled
+    - [ ] Completely Filled
+    - [ ] Cancelled
+  - [ ] Send trade events down message bus
+    - [ ] Setup up RabbitMQ/Kafka
+    - [ ] Event stream ingress
+    - [ ] Event stream egress
+- [ ] Market Data Feed
+  - [ ] **Top-of-book** for best bid, best ask and LTP
+  - [ ] **Depth-of-book** for aggregated order volume at each price level
+  - [ ] **Full Depth** for every individual order and it's position in the book
 - [ ] Time series order regeneration and retrieval
 
 ### FIX Engine
@@ -47,7 +62,7 @@ chmod +x ./scripts/run_tests.sh
 
 - [ ] Unit tests for order book
   - [x] AVL helpers (rotation and height)
-- [ ] Segregate tests  
+- [ ] Segregate tests
 - [ ] Unit tests for FIX parser
 - [ ] Benchmarking and profiling utilities
 - [x] Build system with CMake
