@@ -28,9 +28,12 @@ chmod +x ./scripts/run_tests.sh
 - [ ] Submitting limit and market orders
   - [x] AVL helpers for BST balancing
   - [x] Self-balancing BST for sides
-  - [ ] Insertion in BST
-  - [ ] Deletion in BST
+  - [x] Price Insertion in BST
+  - [x] Order Insertion in BST
+  - [ ] Price Deletion from BST
+  - [ ] Order Deletion from BST
   - [ ] Inorder access in BST
+  - [ ] Side Tree Manager
   - [ ] Order Modification
 - [ ] Matching limit orders, market orders
   - [ ] Price-time priority matching

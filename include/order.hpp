@@ -1,6 +1,7 @@
 #pragma once
 #include <chrono>
 #include <cstdint>
+#include <list>
 #include <string>
 #include <utility>
 #include <utils/print_utils.hpp>
@@ -25,6 +26,8 @@ struct Order {
 
     TimePoint     arrivalTime;
     std::uint64_t arrivalNs;  // for persistence
+
+    std::list<Order*>::iterator level_posn;
 
     explicit Order(
             std::string id, std::string cid, std::uint64_t p, std::uint64_t q, Side s, OrderType t)

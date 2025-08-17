@@ -21,7 +21,7 @@ class SideTree {
     virtual ~SideTree() = default;
 
     virtual NodeType*           insert(Order& order);
-    virtual NodeType*           remove(const std::string& orderId);
+    virtual NodeType*           remove(Order& order);
     virtual NodeType*           find(const int& price);
     virtual std::vector<Order*> top(int length = 1) const;
 
@@ -37,14 +37,14 @@ NodeType* SideTree<NodeType>::insert(Order& order) {
         root = new NodeType(price);
         best = root;
         orderCount++;
-        root->level.push_back(&order);
+        order.level_posn = root->level.insert(root->level.end(), &order);
 
         return root;
     }
 
     NodeType* found = find(price);
     if (found) {
-        found->level.push_back(&order);
+        order.level_posn = found->level.insert(found->level.end(), &order);
         return found;
     }
 
@@ -52,14 +52,22 @@ NodeType* SideTree<NodeType>::insert(Order& order) {
     NodeType* newRoot  = avl.insert(root, price, inserted);
     root               = newRoot;
 
-    inserted->level.push_back(&order);
-
+    order.level_posn = inserted->level.insert(inserted->level.end(), &order);
     return inserted;
 }
 
 template <typename NodeType>
-NodeType* SideTree<NodeType>::remove(const std::string& orderId) {
-    return nullptr;
+NodeType* SideTree<NodeType>::remove(Order& order) {
+    int       price = order.price;
+    NodeType* found = find(price);
+
+    if (!found) {
+        return nullptr;
+    }
+
+    found->level.erase(order.level_posn);
+    orderCount--;
+    return found;
 }
 
 template <typename NodeType>
