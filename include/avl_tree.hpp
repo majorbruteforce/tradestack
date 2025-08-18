@@ -1,8 +1,23 @@
 #pragma once
 #include <algorithm>
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+#include <queue>
 template <typename NodeType>
 class AVLTree {
    public:
+    void      inorder(NodeType* root, std::function<void(NodeType*)> func, size_t limit);
+    NodeType* insert(NodeType* root, uint64_t price, NodeType*& out);
+    NodeType* remove(NodeType* root, uint64_t price);
+    void      freeTree(NodeType* root);
+
+    void printTree(NodeType* root);
+
+    NodeType* findMin(NodeType* node);
+    NodeType* findMax(NodeType* node);
+
+    //    private:
     int height(NodeType* node);
     int balanceFactor(NodeType* node);
 
@@ -10,11 +25,6 @@ class AVLTree {
     NodeType* rotateRight(NodeType* node);
     NodeType* balance(NodeType* node);
     void      updateHeight(NodeType* node);
-
-    void      inorder(NodeType* root, std::function<void(NodeType*)> func);
-    NodeType* insert(NodeType* root, uint64_t price, NodeType*& out);
-    NodeType* remove(NodeType* root, uint64_t price);
-    void      freeTree(NodeType* root);
 };
 
 template <typename NodeType>
@@ -81,14 +91,20 @@ void AVLTree<NodeType>::updateHeight(NodeType* node) {
 }
 
 template <typename NodeType>
-void AVLTree<NodeType>::inorder(NodeType* root, std::function<void(NodeType*)> func) {
+void AVLTree<NodeType>::inorder(NodeType* root, std::function<void(NodeType*)> func, size_t limit) {
+    size_t count = 0;
+
     std::function<void(NodeType*)> recurse = [&](NodeType* node) {
-        if (!node)
+        if (!node || count >= limit)
             return;
         recurse(node->left);
-        func(node);
+        if (count < limit) {
+            func(node);
+            ++count;
+        }
         recurse(node->right);
     };
+
     recurse(root);
 }
 
@@ -112,10 +128,110 @@ NodeType* AVLTree<NodeType>::insert(NodeType* root, uint64_t price, NodeType*& o
 }
 
 template <typename NodeType>
+NodeType* AVLTree<NodeType>::remove(NodeType* root, uint64_t price) {
+    if (!root)
+        return nullptr;
+
+    if (price < root->price) {
+        root->left = remove(root->left, price);
+    } else if (price > root->price) {
+        root->right = remove(root->right, price);
+    } else {
+        if (!root->left || !root->right) {
+            NodeType* temp = root->left ? root->left : root->right;
+
+            if (!temp) {
+                delete root;
+                return nullptr;
+            } else {
+                NodeType* old = root;
+                root          = temp;
+                delete old;
+            }
+        } else {
+            NodeType* successor = findMin(root->right);
+
+            root->leanCopy(successor);
+            root->right = remove(root->right, successor->price);
+        }
+    }
+
+    return balance(root);
+}
+
+template <typename NodeType>
 void AVLTree<NodeType>::freeTree(NodeType* root) {
     if (!root)
         return;
     freeTree(root->left);
     freeTree(root->right);
     delete root;
+}
+
+template <typename NodeType>
+void AVLTree<NodeType>::printTree(NodeType* root) {
+    if (!root)
+        return;
+
+    auto findHeight = [&](NodeType* node) {
+        if (!node)
+            return -1;
+        std::queue<NodeType*> q;
+        int                   height = -1;
+        q.push(node);
+        while (!q.empty()) {
+            height++;
+            int size = q.size();
+            while (size--) {
+                NodeType* cur = q.front();
+                q.pop();
+                if (cur->left)
+                    q.push(cur->left);
+                if (cur->right)
+                    q.push(cur->right);
+            }
+        }
+        return height;
+    };
+
+    int height = findHeight(root);
+    int rows   = height + 1;
+    int cols   = std::pow(2, rows) - 1;
+
+    std::vector<std::vector<std::string>> grid(rows, std::vector<std::string>(cols, " "));
+
+    std::function<void(NodeType*, int, int)> fill = [&](NodeType* node, int row, int col) {
+        if (!node)
+            return;
+        grid[row][col] = std::to_string(node->price);
+
+        int offset = std::pow(2, height - row - 1);
+        if (node->left)
+            fill(node->left, row + 1, col - offset);
+        if (node->right)
+            fill(node->right, row + 1, col + offset);
+    };
+
+    fill(root, 0, (cols - 1) / 2);
+
+    for (auto& row : grid) {
+        for (auto& cell : row) std::cout << (cell.empty() ? " " : cell);
+        std::cout << "\n";
+    }
+}
+
+template <typename NodeType>
+NodeType* AVLTree<NodeType>::findMin(NodeType* node) {
+    if (!node)
+        return nullptr;
+    while (node->left) node = node->left;
+    return node;
+}
+
+template <typename NodeType>
+NodeType* AVLTree<NodeType>::findMax(NodeType* node) {
+    if (!node)
+        return nullptr;
+    while (node->right) node = node->right;
+    return node;
 }

@@ -11,6 +11,14 @@ class SideTreeTest : public ::testing::Test {
         MockNode*         left;
         MockNode*         right;
 
+        void leanCopy(const MockNode* other) {
+            if (!other)
+                return;
+            price  = other->price;
+            level  = other->level;
+            height = other->height;
+        }
+
         MockNode(int k, MockNode* l = nullptr, MockNode* r = nullptr)
             : price(k), height(1), left(l), right(r) {}
     };
@@ -19,7 +27,7 @@ class SideTreeTest : public ::testing::Test {
     SideTree<MockNode>* st;
 
     void SetUp() override {
-        st  = new SideTree<MockNode>([](const int& a, const int& b) { return a < b; });
+        st  = new SideTree<MockNode>();
         o   = new Order("MCK123", "C456", 100, 10, Side::Buy, OrderType::Limit);
         o10 = new Order("MCK458", "C245", 10, 25, Side::Buy, OrderType::Limit);
         o20 = new Order("MCK564", "C325", 20, 16, Side::Buy, OrderType::Limit);
@@ -69,6 +77,9 @@ TEST_F(SideTreeTest, InsertsInNonEmptyTree) {
             << "Right of root node should be node(price = " << third->price << ")";
     EXPECT_EQ(st->root->left, first)
             << "Right of root node should be node(price = " << first->price << ")";
+
+    EXPECT_EQ(st->low->price, 10) << "Highest price level should be 10";
+    EXPECT_EQ(st->high->price, 30) << "Lowest price level should be 30";
 }
 
 TEST_F(SideTreeTest, RemovesOrderFromLevel) {
@@ -82,55 +93,41 @@ TEST_F(SideTreeTest, RemovesOrderFromLevel) {
     MockNode* B = st->insert(oB);
     MockNode* C = st->insert(oC);
 
-    ASSERT_NE(A, nullptr) << "insert() returned nullptr for A";
-    ASSERT_NE(B, nullptr) << "insert() returned nullptr for B";
-    ASSERT_NE(C, nullptr) << "insert() returned nullptr for C";
+    ASSERT_NE(A, nullptr);
+    ASSERT_NE(B, nullptr);
+    ASSERT_NE(C, nullptr);
 
-    EXPECT_EQ(A->level.size(), 1) << "size of level 10 must be 1";
-    EXPECT_EQ(A->level.front()->getId(), "MCK458")
-            << "front of level 10 must contain order(id=MCK458)";
-    EXPECT_EQ(B->level.size(), 1) << "size of level 20 must be 1";
-    EXPECT_EQ(B->level.front()->getId(), "MCK564")
-            << "front of level 20 must contain order(id=MCK564)";
-    EXPECT_EQ(C->level.size(), 1) << "size of level 30 must be 1";
-    EXPECT_EQ(C->level.front()->getId(), "MCK154")
-            << "front of level 30 must contain order(id=MCK154)";
+    EXPECT_EQ(A->level.size(), 1);
+    EXPECT_EQ(A->level.front()->getId(), "MCK458");
+    EXPECT_EQ(B->level.size(), 1);
+    EXPECT_EQ(B->level.front()->getId(), "MCK564");
+    EXPECT_EQ(C->level.size(), 1);
+    EXPECT_EQ(C->level.front()->getId(), "MCK154");
 
     MockNode* D = st->insert(oD);
     MockNode* E = st->insert(oE);
 
-    ASSERT_NE(D, nullptr) << "insert() returned nullptr for D";
-    ASSERT_NE(E, nullptr) << "insert() returned nullptr for E";
+    ASSERT_NE(D, nullptr);
+    ASSERT_NE(E, nullptr);
 
-    EXPECT_EQ(D, C) << "insert() MCK574 must return price level 30";
-    EXPECT_EQ(E, C) << "insert() MCK964 must return price level 30";
+    EXPECT_EQ(D, C);
+    EXPECT_EQ(E, C);
 
-    EXPECT_EQ(A->level.size(), 1) << "size of level 10 must be 1";
-    EXPECT_EQ(A->level.front()->getId(), "MCK458")
-            << "front of level 10 must contain order(id=MCK458)";
-    EXPECT_EQ(B->level.size(), 1) << "size of level 20 must be 1";
-    EXPECT_EQ(B->level.front()->getId(), "MCK564")
-            << "front of level 20 must contain order(id=MCK564)";
-    EXPECT_EQ(C->level.size(), 3) << "size of level 30 must be 3";
-    EXPECT_EQ(C->level.front()->getId(), "MCK154")
-            << "front of level 30 must contain order(id=MCK154)";
-    EXPECT_EQ(C->level.back()->getId(), "MCK964")
-            << "front of level 30 must contain order(id=MCK154)";
+    EXPECT_EQ(C->level.size(), 3);
+    EXPECT_EQ(C->level.front()->getId(), "MCK154");
+    EXPECT_EQ(C->level.back()->getId(), "MCK964");
 
     MockNode* F = st->remove(oA);
-
-    EXPECT_EQ(F, A) << "price level returned for remove() of MCK458 must be 10";
-    EXPECT_TRUE(A->level.empty()) << "price level 10 must be empty";
+    EXPECT_EQ(F, nullptr) << "Removing last order at price 10 must delete node";
 
     MockNode* G = st->remove(oC);
 
-    EXPECT_EQ(G, C) << "price level returned for remove() of MCK154 must be 30";
-    EXPECT_EQ(C->level.size(), 2) << "size of level 30 must be 2";
-    EXPECT_EQ(C->level.front()->getId(), "MCK574")
-            << "front of level 30 must contain order(id=MCK154)";
-    EXPECT_EQ(C->level.back()->getId(), "MCK964")
-            << "front of level 30 must contain order(id=MCK154)";
+    EXPECT_EQ(G, C);
+    EXPECT_EQ(C->level.size(), 2);
+    EXPECT_EQ(C->level.front()->getId(), "MCK574");
+    EXPECT_EQ(C->level.back()->getId(), "MCK964");
 }
+
 
 TEST_F(SideTreeTest, FindsPriceLevel) {
 }

@@ -44,5 +44,5 @@ In use: **BST** + **list**
 
 ### Using AVL Trees
 - The **BSTs** need to be balanced to ensure that the trees don't have linearity.
-- 
+- While adding/removing nodes if a disbalance is created, it will first affect the most local subtree it is being added to.
 

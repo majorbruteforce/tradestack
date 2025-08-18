@@ -30,9 +30,10 @@ chmod +x ./scripts/run_tests.sh
   - [x] Self-balancing BST for sides
   - [x] Price Insertion in BST
   - [x] Order Insertion in BST
-  - [ ] Price Deletion from BST
-  - [ ] Order Deletion from BST
+  - [x] Price Deletion from BST
+  - [x] Order Deletion from BST
   - [ ] Inorder access in BST
+  - [x] Maintain and access best price level
   - [ ] Side Tree Manager
   - [ ] Order Modification
 - [ ] Matching limit orders, market orders
@@ -63,9 +64,8 @@ chmod +x ./scripts/run_tests.sh
 
 ### Testing
 
-- [ ] Unit tests for order book
-  - [x] AVL helpers (rotation and height)
-- [ ] Segregate tests
+- [x] Setup Unit test flow using gtest
+- [x] Segregate tests
 - [ ] Unit tests for FIX parser
 - [ ] Benchmarking and profiling utilities
 - [x] Build system with CMake

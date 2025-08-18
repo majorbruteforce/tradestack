@@ -9,14 +9,14 @@
 template <typename NodeType>
 class SideTree {
    public:
-    AVLTree<NodeType>                   avl;
-    NodeType*                           root;
-    NodeType*                           best;
-    size_t                              orderCount;
-    std::function<bool(double, double)> priceComparator;
+    AVLTree<NodeType> avl;
+    NodeType*         root;
+    NodeType*         low;
+    NodeType*         high;
+    size_t            orderCount;
+    Side              side;
 
-    explicit SideTree(std::function<bool(double, double)> cmp)
-        : root(nullptr), best(nullptr), orderCount(0), priceComparator(std::move(cmp)) {}
+    explicit SideTree() : root(nullptr), low(nullptr), high(nullptr), orderCount(0) {}
 
     virtual ~SideTree() = default;
 
@@ -25,9 +25,29 @@ class SideTree {
     virtual NodeType*           find(const int& price);
     virtual std::vector<Order*> top(int length = 1) const;
 
+    virtual void print();
+
     size_t size() const { return orderCount; }
     bool   empty() const { return orderCount == 0; }
+
+   private:
+    virtual void updateRange(NodeType* inserted);
+    virtual void recomputeRange(NodeType* root);
 };
+
+template <typename NodeType>
+void SideTree<NodeType>::updateRange(NodeType* inserted) {
+    if (!low || inserted->price < low->price)
+        low = inserted;
+    if (!high || inserted->price > high->price)
+        high = inserted;
+}
+
+template <typename NodeType>
+void SideTree<NodeType>::recomputeRange(NodeType* root) {
+    low  = root ? avl.findMin(root) : nullptr;
+    high = root ? avl.findMax(root) : nullptr;
+}
 
 template <typename NodeType>
 NodeType* SideTree<NodeType>::insert(Order& order) {
@@ -35,9 +55,9 @@ NodeType* SideTree<NodeType>::insert(Order& order) {
 
     if (!root) {
         root = new NodeType(price);
-        best = root;
         orderCount++;
         order.level_posn = root->level.insert(root->level.end(), &order);
+        updateRange(root);
 
         return root;
     }
@@ -53,6 +73,7 @@ NodeType* SideTree<NodeType>::insert(Order& order) {
     root               = newRoot;
 
     order.level_posn = inserted->level.insert(inserted->level.end(), &order);
+    updateRange(inserted);
     return inserted;
 }
 
@@ -67,6 +88,12 @@ NodeType* SideTree<NodeType>::remove(Order& order) {
 
     found->level.erase(order.level_posn);
     orderCount--;
+
+    if (found->level.empty()) {
+        avl.remove(root, price);
+        return nullptr;
+    }
+
     return found;
 }
 
@@ -88,6 +115,11 @@ NodeType* SideTree<NodeType>::find(const int& price) {
     }
 
     return nullptr;
+}
+
+template <typename NodeType>
+void SideTree<NodeType>::print() {
+    avl.printTree(root);
 }
 
 template <typename NodeType>
