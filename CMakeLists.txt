@@ -1,24 +1,42 @@
-cmake_minimum_required(VERSION 3.22)
-project(tradestack)
+cmake_minimum_required(VERSION 3.25)
+project(tradestack
+    VERSION 0.1.0
+    LANGUAGES CXX
+)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 endif()
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_DEBUG_POSTFIX "-d")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-include(cmake/UpateSubmodules.cmake)
-include(CTest)
-
-add_executable(tradestack
+set(SOURCES
     src/main.cpp
     src/utils/id_generator.cpp
     src/order.cpp
 )
-include_directories(include)
 
+add_executable(tradestack ${SOURCES})
+
+target_include_directories(tradestack
+    PRIVATE ${CMAKE_SOURCE_DIR}/include
+)
+
+include(CTest)
 enable_testing()
-add_subdirectory(external/googletest)
+
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.tar.gz
+)
+set(INSTALL_GTEST OFF CACHE BOOL "Disable installation of googletest" FORCE)
+FetchContent_MakeAvailable(googletest)
+
 add_subdirectory(tests)

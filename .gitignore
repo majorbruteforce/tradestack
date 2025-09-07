@@ -1,7 +1,8 @@
 # CMake build directories
-/build/
-/cmake-build-*/
-/tests/Testing/
+build/
+cmake-build-*/
+tests/Testing/
+.cache/
 
 # Binary files
 *.out

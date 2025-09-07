@@ -1,254 +1,114 @@
-#include <avl_tree.hpp>
+#include "avl_tree.hpp"
+
+#include <cstdint>
 #include <gtest/gtest.h>
+#include <vector>
+
+using tradestack::AVLTree;
 
 class AVLTreeTest : public ::testing::Test {
-   protected:
-    struct MockNode {
-        int       price;
-        int       height;
-        MockNode* left;
-        MockNode* right;
-
-        MockNode(int k, MockNode* l = nullptr, MockNode* r = nullptr)
-            : price(k), height(1), left(l), right(r) {}
-    };
-
-    AVLTree<MockNode> avl;
-
-    MockNode* makeNode(int price, MockNode* left = nullptr, MockNode* right = nullptr) {
-        return new MockNode(price, left, right);
-    }
+protected:
+    AVLTree<int> avl;
 };
 
-TEST_F(AVLTreeTest, HeightWorks) {
-    MockNode* n = makeNode(10);
-    EXPECT_EQ(avl.height(n), 1) << "Height of a leaf node (price=" << n->price << ") should be 1.";
-    delete n;
+TEST_F(AVLTreeTest, InsertAndInorderAreSortedUnique) {
+    auto [n30, c30a] = avl.insert(30);
+    auto [n10, c10] = avl.insert(10);
+    auto [n50, c50] = avl.insert(50);
+    auto [n20, c20] = avl.insert(20);
+    auto [n25, c25] = avl.insert(25);
+    auto [n30b, c30b] = avl.insert(30);
+
+    EXPECT_TRUE(c30a);
+    EXPECT_TRUE(c10);
+    EXPECT_TRUE(c50);
+    EXPECT_TRUE(c20);
+    EXPECT_TRUE(c25);
+    EXPECT_FALSE(c30b);
+    EXPECT_EQ(n30, n30b);
+
+    std::vector<int> keys;
+    avl.inorder([&](auto* node) { keys.push_back(node->key); });
+    std::vector<int> expected{10, 20, 25, 30, 50};
+    EXPECT_EQ(keys, expected);
 }
 
-TEST_F(AVLTreeTest, UpdateHeightWorks) {
-    MockNode* m = makeNode(20);
-    MockNode* n = makeNode(10, m);
+TEST_F(AVLTreeTest, FindMinMaxWork) {
+    (void) avl.insert(40);
+    (void) avl.insert(10);
+    (void) avl.insert(70);
+    (void) avl.insert(25);
 
-    EXPECT_EQ(avl.height(n), 1) << "Initial height of node (price=" << n->price << ") should be 1.";
-    avl.updateHeight(n);
-    EXPECT_EQ(avl.height(n), 2) << "Height after adding one child to node (price=" << n->price
-                                << ") should be 2.";
-
-    delete m;
-    delete n;
+    auto mn = avl.findMin();
+    auto mx = avl.findMax();
+    ASSERT_NE(mn, nullptr);
+    ASSERT_NE(mx, nullptr);
+    EXPECT_EQ(mn->key, 10);
+    EXPECT_EQ(mx->key, 70);
 }
 
-TEST_F(AVLTreeTest, BalanceFactorWorks) {
-    MockNode* left  = makeNode(10);
-    MockNode* right = makeNode(5);
-    MockNode* root  = makeNode(2, left, right);
+TEST_F(AVLTreeTest, FindWorks) {
+    (void) avl.insert(5);
+    (void) avl.insert(2);
+    (void) avl.insert(9);
 
-    EXPECT_EQ(avl.balanceFactor(root), 0)
-            << "Balance factor should be 0 when left and right subtrees have equal height.";
+    auto n2 = avl.find(2);
+    auto n9 = avl.find(9);
+    auto n7 = avl.find(7);
 
-    root->left = nullptr;
-    EXPECT_EQ(root->left, nullptr) << "Left child of root should be null after removal.";
-
-    EXPECT_EQ(avl.balanceFactor(root), -1)
-            << "Balance factor should be -1 when right subtree is taller by 1.";
-
-    root->right = nullptr;
-    root->left  = left;
-    EXPECT_EQ(avl.balanceFactor(root), 1)
-            << "Balance factor should be 1 when left subtree is taller by 1.";
-
-    delete left;
-    delete right;
-    delete root;
+    ASSERT_NE(n2, nullptr);
+    ASSERT_NE(n9, nullptr);
+    EXPECT_EQ(n2->key, 2);
+    EXPECT_EQ(n9->key, 9);
+    EXPECT_EQ(n7, nullptr);
 }
 
-TEST_F(AVLTreeTest, RightRotationWorks) {
-    MockNode* c = makeNode(10);
-    MockNode* b = makeNode(20, c);
-    MockNode* a = makeNode(30, b);
+TEST_F(AVLTreeTest, EraseWorksAndUpdatesMinMax) {
+    (void) avl.insert(10);
+    (void) avl.insert(20);
+    (void) avl.insert(30);
 
-    avl.rotateRight(a);
+    ASSERT_NE(avl.findMin(), nullptr);
+    ASSERT_NE(avl.findMax(), nullptr);
+    EXPECT_EQ(avl.findMin()->key, 10);
+    EXPECT_EQ(avl.findMax()->key, 30);
 
-    EXPECT_EQ(b->left, c) << "Left Child of node(price = " << b->price
-                          << " ) after rotation should be node(price = " << c->price;
+    EXPECT_TRUE(avl.erase(20));
+    EXPECT_EQ(avl.find(20), nullptr);
 
-    EXPECT_EQ(b->right, a) << "Right Child of node(price = " << b->price
-                           << " ) after rotation should be node(price = " << a->price;
+    EXPECT_TRUE(avl.erase(10));
+    ASSERT_NE(avl.findMin(), nullptr);
+    EXPECT_EQ(avl.findMin()->key, 30);
 
-    delete a;
-    delete b;
-    delete c;
+    EXPECT_TRUE(avl.erase(30));
+    EXPECT_EQ(avl.findMin(), nullptr);
+    EXPECT_EQ(avl.findMax(), nullptr);
+
+    EXPECT_FALSE(avl.erase(1234));
 }
 
-TEST_F(AVLTreeTest, LeftRotationWorks) {
-    MockNode* c = makeNode(10);
-    MockNode* b = makeNode(20, nullptr, c);
-    MockNode* a = makeNode(30, nullptr, b);
-
-    avl.rotateLeft(a);
-
-    EXPECT_EQ(b->right, c) << "Right Child of node(price = " << b->price
-                           << " ) after rotation should be node(price = " << c->price;
-
-    EXPECT_EQ(b->left, a) << "Left Child of node(price = " << b->price
-                          << " ) after rotation should be node(price = " << a->price;
-
-    delete a;
-    delete b;
-    delete c;
-}
-
-TEST_F(AVLTreeTest, LeftRightRotationWorks) {
-    MockNode* n20 = makeNode(20);
-    MockNode* n10 = makeNode(10, nullptr, n20);
-    MockNode* n30 = makeNode(30, n10, nullptr);
-
-    n30->left = avl.rotateLeft(n10);
-
-    MockNode* newRoot = avl.rotateRight(n30);
-
-    EXPECT_EQ(newRoot, n20) << "After LR rotation, new root should be 20.";
-    EXPECT_EQ(newRoot->left, n10) << "Left child of root should be 10.";
-    EXPECT_EQ(newRoot->right, n30) << "Right child of root should be 30.";
-
-    delete n10;
-    delete n20;
-    delete n30;
-}
-
-TEST_F(AVLTreeTest, RightLeftRotationWorks) {
-    MockNode* n20 = makeNode(20);
-    MockNode* n30 = makeNode(30, n20, nullptr);
-    MockNode* n10 = makeNode(10, nullptr, n30);
-
-    n10->right        = avl.rotateRight(n30);
-    MockNode* newRoot = avl.rotateLeft(n10);
-
-    EXPECT_EQ(newRoot, n20) << "After RL rotation, new root should be 20.";
-    EXPECT_EQ(newRoot->left, n10) << "Left child of root should be 10.";
-    EXPECT_EQ(newRoot->right, n30) << "Right child of root should be 30.";
-
-    delete n10;
-    delete n20;
-    delete n30;
-}
-
-TEST_F(AVLTreeTest, BalanceWorks) {
-    {
-        MockNode* n10 = makeNode(10);
-        avl.updateHeight(n10);
-
-        MockNode* n20 = makeNode(20, n10);
-        avl.updateHeight(n20);
-
-        MockNode* n30 = makeNode(30, n20);
-        avl.updateHeight(n30);
-
-        MockNode* newRoot = avl.balance(n30);
-        EXPECT_EQ(newRoot, n20) << "LL case: root should be 20 after balancing.";
-        EXPECT_EQ(newRoot->left, n10) << "LL case: left child of root should be 10.";
-        EXPECT_EQ(newRoot->right, n30) << "LL case: right child of root should be 30.";
-
-        delete n10;
-        delete n20;
-        delete n30;
+TEST_F(AVLTreeTest, InorderLimitStopsEarly) {
+    for (int k: {40, 10, 70, 25, 5, 60}) {
+        (void) avl.insert(k);
     }
 
-    {
-        MockNode* n40 = makeNode(40);
-        avl.updateHeight(n40);
-
-        MockNode* n30 = makeNode(30, nullptr, n40);
-        avl.updateHeight(n30);
-
-        MockNode* n20 = makeNode(20, nullptr, n30);
-        avl.updateHeight(n20);
-
-        MockNode* newRoot = avl.balance(n20);
-        EXPECT_EQ(newRoot, n30) << "RR case: root should be 30 after balancing.";
-        EXPECT_EQ(newRoot->left, n20) << "RR case: left child of root should be 20.";
-        EXPECT_EQ(newRoot->right, n40) << "RR case: right child of root should be 40.";
-
-        delete n20;
-        delete n30;
-        delete n40;
-    }
-
-    {
-        MockNode* n20 = makeNode(20);
-        avl.updateHeight(n20);
-
-        MockNode* n10 = makeNode(10, nullptr, n20);
-        avl.updateHeight(n10);
-
-        MockNode* n30 = makeNode(30, n10, nullptr);
-        avl.updateHeight(n30);
-
-        MockNode* newRoot = avl.balance(n30);
-        EXPECT_EQ(newRoot, n20) << "LR case: root should be 20 after balancing.";
-        EXPECT_EQ(newRoot->left, n10) << "LR case: left child of root should be 10.";
-        EXPECT_EQ(newRoot->right, n30) << "LR case: right child of root should be 30.";
-
-        delete n10;
-        delete n20;
-        delete n30;
-    }
-
-    {
-        MockNode* n20 = makeNode(20);
-        avl.updateHeight(n20);
-
-        MockNode* n30 = makeNode(30, n20, nullptr);
-        avl.updateHeight(n30);
-
-        MockNode* n10 = makeNode(10, nullptr, n30);
-        avl.updateHeight(n10);
-
-        MockNode* newRoot = avl.balance(n10);
-        EXPECT_EQ(newRoot, n20) << "RL case: root should be 20 after balancing.";
-        EXPECT_EQ(newRoot->left, n10) << "RL case: left child of root should be 10.";
-        EXPECT_EQ(newRoot->right, n30) << "RL case: right child of root should be 30.";
-
-        delete n10;
-        delete n20;
-        delete n30;
-    }
+    std::vector<int> first3;
+    avl.inorder([&](auto* n) { first3.push_back(n->key); }, /*limit*/ 3);
+    // Sorted order is {5, 10, 25, 40, 60, 70}; first 3:
+    std::vector<int> expected{5, 10, 25};
+    EXPECT_EQ(first3, expected);
 }
 
-TEST_F(AVLTreeTest, InsertWorks) {
-    MockNode* root     = nullptr;
-    MockNode* inserted = nullptr;
+TEST(AVLTreeStandalone, HeterogeneousLookupWithTransparentLess) {
+    AVLTree<std::uint64_t, std::less<>> tree;
+    (void) tree.insert(100u);
+    (void) tree.insert(200u);
 
-    root = avl.insert(root, 50, inserted);
-    root = avl.insert(root, 30, inserted);
-    root = avl.insert(root, 10, inserted);
+    unsigned long long probe = 100ULL;
+    auto n = tree.find(probe);
+    ASSERT_NE(n, nullptr);
+    EXPECT_EQ(n->key, 100u);
 
-    EXPECT_EQ(root->price, 30);
-    EXPECT_EQ(root->left->price, 10);
-    EXPECT_EQ(root->right->price, 50);
-
-    root = avl.insert(root, 20, inserted);
-    root = avl.insert(root, 25, inserted);
-
-    EXPECT_EQ(root->price, 30);
-    EXPECT_EQ(root->left->price, 20);
-    EXPECT_EQ(root->right->price, 50);
-    EXPECT_EQ(root->left->left->price, 10);
-    EXPECT_EQ(root->left->right->price, 25);
-
-    MockNode* oldRoot = root;
-    root              = avl.insert(root, 30, inserted);
-
-    EXPECT_EQ(root, oldRoot);
-    EXPECT_EQ(inserted, oldRoot);
-
-    std::function<void(MockNode*)> deleteTree = [&](MockNode* node) {
-        if (!node)
-            return;
-        deleteTree(node->left);
-        deleteTree(node->right);
-        delete node;
-    };
-    deleteTree(root);
+    EXPECT_TRUE(tree.erase(200ULL));
+    EXPECT_EQ(tree.find(200u), nullptr);
 }

@@ -1,36 +1,46 @@
-#include <iostream>
-#include <order.hpp>
-#include <price_level_node.hpp>
-#include <side_tree.hpp>
+#include <print>
+#include <vector>
+
+#include "order.hpp"
+#include "side_tree.hpp"
+
+using namespace tradestack;
 
 int main() {
-    SideTree<PriceLevelNode> st;
+    SideTree st{Side::Buy};
 
-    Order oA("MCK458", "C245", 10, 25, Side::Buy, OrderType::Limit);
-    Order oB("MCK564", "C325", 20, 16, Side::Buy, OrderType::Limit);
-    Order oC("MCK154", "C226", 30, 32, Side::Buy, OrderType::Limit);
-    Order oD("MCK574", "C386", 30, 32, Side::Buy, OrderType::Limit);
-    Order oE("MCK964", "C455", 30, 32, Side::Buy, OrderType::Limit);
+    std::vector<Order> orders{
+        {"MCK458", "C245", 10, 25, Side::Buy, OrderType::Limit},
+        {"MCK564", "C325", 20, 16, Side::Buy, OrderType::Limit},
+        {"MCK154", "C226", 30, 32, Side::Buy, OrderType::Limit},
+        {"MCK574", "C386", 30, 32, Side::Buy, OrderType::Limit},
+        {"MCK964", "C455", 30, 32, Side::Buy, OrderType::Limit},
+    };
 
-    PriceLevelNode* A = st.insert(oA);
-    PriceLevelNode* B = st.insert(oB);
-    PriceLevelNode* C = st.insert(oC);
+    for (int i = 0; i < 3; ++i) {
+        st.insert(orders[i]);
+    }
 
     st.print();
-    std::cout << std::endl;
+    std::print("\n");
+    for (int i = 3; i < std::ssize(orders); ++i) {
+        st.insert(orders[i]);
+    }
 
-    PriceLevelNode* D = st.insert(oD);
-    PriceLevelNode* E = st.insert(oE);
     st.print();
-    std::cout << std::endl;
+    std::print("\n");
 
-    PriceLevelNode* F = st.remove(oA);
+    st.remove(orders[0]);
     st.print();
-    std::cout << std::endl;
+    std::print("\n");
 
-    PriceLevelNode* G = st.remove(oC);
+    st.remove(orders[2]);
     st.print();
-    std::cout << std::endl;
+    std::print("\n");
+
+    if (auto best = st.top(); !best.empty()) {
+        std::println("Best order: {} at price {}", best.front()->id, best.front()->price);
+    }
 
     return 0;
 }

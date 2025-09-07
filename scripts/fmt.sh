@@ -1,17 +1,27 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-set -e
+SRC_DIRS=("src" "include")
 
-if [ "$1" == "all" ] || [ -z "$1" ]; then
-    echo "Formatting all C++ source/header files..."
-    clang-format -i $(find src include -type f \( -name "*.cpp" -o -name "*.hpp" -o -name "*.h" \))
-    echo "All files formatted."
-else
-    if [ $# -eq 0 ]; then
-        echo "Usage: $0 all | <file1> <file2> ..."
-        exit 1
+format_all() {
+    echo "🔧 Formatting all C++ source/header files..."
+    mapfile -d '' files < <(find "${SRC_DIRS[@]}" -type f \( -name "*.cpp" -o -name "*.hpp" -o -name "*.h" \) -print0)
+    if [ ${#files[@]} -eq 0 ]; then
+        echo "⚠️  No files found."
+        return
     fi
-    echo "Formatting selected files..."
+    clang-format -i "${files[@]}"
+    echo "✅ Formatted ${#files[@]} files."
+}
+
+format_selected() {
+    echo "🔧 Formatting selected files..."
     clang-format -i "$@"
-    echo "Selected files formatted."
+    echo "✅ Formatted $# files."
+}
+
+if [ $# -eq 0 ] || [ "$1" = "all" ]; then
+    format_all
+else
+    format_selected "$@"
 fi
