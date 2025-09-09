@@ -1,6 +1,8 @@
+#include "side_tree.hpp"
+
 #include <gtest/gtest.h>
-#include <order.hpp>
-#include <side_tree.hpp>
+
+#include "order.hpp"
 
 using namespace tradestack;
 

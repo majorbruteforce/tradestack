@@ -1,6 +1,6 @@
 #pragma once
 
-#include <algorithm>
+#include <concepts>
 #include <functional>
 #include <limits>
 #include <memory>
@@ -27,7 +27,7 @@ namespace tradestack {
      * @tparam Key Primary key type.
      * @tparam K Alternative comparable key type.
      */
-    template<class Cmp, class Key, class K>
+    template<typename Cmp, typename Key, typename K>
     concept TransparentComparable = requires(const Cmp& cmp, const Key& a, const K& b) {
         typename Cmp::is_transparent;
         { cmp(a, b) } -> std::convertible_to<bool>;
@@ -71,13 +71,13 @@ namespace tradestack {
         /// Const raw node pointer.
         using const_node = const node_type*;
         /// Function type for visiting mutable nodes.
-        using visit_func = std::function<void(node_ref)>;
+        // using visit_func = std::function<void(node_ref)>;
         /// Function type for visiting const nodes.
-        using cvisit_func = std::function<void(const_node)>;
+        // using cvisit_func = std::function<void(const_node)>;
         /// Result of an insertion: (pointer to node, bool created).
         using insert_res = std::pair<node_ref, bool>;
         /// Size type for counts.
-        using size_type = std::size_t;
+        using size_type = size_t;
         /// Type representing node height.
         using height_type = int;
 
@@ -94,8 +94,10 @@ namespace tradestack {
         /**
          * @brief Move constructor.
          */
-        AVLTree(AVLTree&& other) noexcept :
-            m_root(std::move(other.m_root)), m_cmp(std::move(other.m_cmp)), m_min(other.m_min),
+        AVLTree(AVLTree&& other) noexcept
+          : m_root(std::move(other.m_root)),
+            m_cmp(std::move(other.m_cmp)),
+            m_min(other.m_min),
             m_max(other.m_max) {
             other.m_min = other.m_max = nullptr;
         }
@@ -131,6 +133,7 @@ namespace tradestack {
 
         /// Insert a key by copy.
         [[nodiscard]] insert_res insert(const Key& k) { return insert_impl(m_root, k); }
+
         /// Insert a key by move.
         [[nodiscard]] insert_res insert(Key&& k) { return insert_impl(m_root, std::move(k)); }
 
@@ -139,6 +142,7 @@ namespace tradestack {
 
         /// Find a node by key. Mutable.
         [[nodiscard]] node_ref find(const Key& k) noexcept { return find_impl(m_root.get(), k); }
+
         /// Find a node by key. Const.
         [[nodiscard]] const_node find(const Key& k) const noexcept {
             return find_impl(m_root.get(), k);
@@ -150,7 +154,7 @@ namespace tradestack {
          * Allows insertion with a key type `K` different from `Key` if
          * the comparator supports it.
          */
-        template<class K>
+        template<typename K>
             requires TransparentComparable<Compare, Key, K> &&
                      (!std::same_as<std::remove_cvref_t<K>, Key>)
         [[nodiscard]] insert_res insert(K&& k) {
@@ -160,7 +164,7 @@ namespace tradestack {
         /**
          * @brief Erase with transparent comparator.
          */
-        template<class K>
+        template<typename K>
             requires TransparentComparable<Compare, Key, K> &&
                      (!std::same_as<std::remove_cvref_t<K>, Key>)
         bool erase(const K& k) {
@@ -178,7 +182,7 @@ namespace tradestack {
         /**
          * @brief Find with transparent comparator.
          */
-        template<class K>
+        template<typename K>
             requires TransparentComparable<Compare, Key, K> &&
                      (!std::same_as<std::remove_cvref_t<K>, Key>)
         [[nodiscard]] node_ref find(const K& k) noexcept {
@@ -188,7 +192,7 @@ namespace tradestack {
         /**
          * @brief Const find with transparent comparator.
          */
-        template<class K>
+        template<typename K>
             requires TransparentComparable<Compare, Key, K> &&
                      (!std::same_as<std::remove_cvref_t<K>, Key>)
         [[nodiscard]] const_node find(const K& k) const noexcept {
@@ -566,11 +570,12 @@ namespace tradestack {
          * @param limit Maximum number of nodes to visit.
          * @param count Reference to visited count.
          */
-        template<class F>
+        template<typename F>
         static void inorder_impl(node_ref n, F&& visit, size_type limit, size_type& count) {
             if (!n || count >= limit) {
                 return;
             }
+
             inorder_impl(n->left.get(), std::forward<F>(visit), limit, count);
             if (count < limit) {
                 std::forward<F>(visit)(n);
@@ -591,11 +596,12 @@ namespace tradestack {
          * @param limit Maximum number of nodes to visit.
          * @param count Reference to visited count.
          */
-        template<class F>
+        template<typename F>
         static void inorder_impl(const_node n, F&& visit, size_type limit, size_type& count) {
             if (!n || count >= limit) {
                 return;
             }
+
             inorder_impl(n->left.get(), std::forward<F>(visit), limit, count);
             if (count < limit) {
                 std::forward<F>(visit)(n);

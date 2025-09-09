@@ -26,10 +26,11 @@ BraceWrapping:
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
 BreakBeforeBraces: Custom
-BreakConstructorInitializers: AfterColon
+BreakConstructorInitializers: BeforeColon
 BreakConstructorInitializersBeforeComma: false
 ColumnLimit: 100
-ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 2
 ContinuationIndentWidth: 4
 IncludeCategories:
   - Regex: "^<.*"

@@ -93,14 +93,14 @@ TEST_F(AVLTreeTest, InorderLimitStopsEarly) {
     }
 
     std::vector<int> first3;
-    avl.inorder([&](auto* n) { first3.push_back(n->key); }, /*limit*/ 3);
+    avl.inorder([&](auto* n) { first3.push_back(n->key); }, 3);
     // Sorted order is {5, 10, 25, 40, 60, 70}; first 3:
     std::vector<int> expected{5, 10, 25};
     EXPECT_EQ(first3, expected);
 }
 
 TEST(AVLTreeStandalone, HeterogeneousLookupWithTransparentLess) {
-    AVLTree<std::uint64_t, std::less<>> tree;
+    AVLTree<uint64_t, std::less<>> tree;
     (void) tree.insert(100u);
     (void) tree.insert(200u);
 

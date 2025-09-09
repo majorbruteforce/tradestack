@@ -33,9 +33,9 @@ namespace tradestack {
      */
     struct PriceLevelNode {
         /// Type representing a price value.
-        using price_type = std::uint64_t;
+        using price_type = uint64_t;
         /// Type representing container sizes.
-        using size_type = std::size_t;
+        using size_type = size_t;
         /// Container type for storing orders at this price level.
         using level_type = std::list<Order>;
         /// Alias for this node type.
@@ -67,12 +67,10 @@ namespace tradestack {
         PriceLevelNode(const node_type&) = delete;
         /// Copy assignment is deleted (nodes are non-copyable).
         node_type& operator=(const node_type&) = delete;
-
         /// Move constructor (transfers ownership of subtrees and orders).
         PriceLevelNode(node_type&&) noexcept = default;
         /// Move assignment operator (transfers ownership of subtrees and orders).
         node_type& operator=(node_type&&) noexcept = default;
-
         /// Default destructor.
         ~PriceLevelNode() = default;
 
@@ -109,7 +107,7 @@ namespace tradestack {
             if (right) {
                 node->right = right->clone();
             }
-            
+
             return node;
         }
     };

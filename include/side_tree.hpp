@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <unordered_map>

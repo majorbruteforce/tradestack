@@ -84,9 +84,13 @@ namespace tradestack {
          * @param t Order type (market/limit).
          */
         Order(order_id_type oid, client_id_type cid, price_type p, quantity_type q, Side s,
-              OrderType t) :
-            id(std::move(oid)), clientOrderId(std::move(cid)), price(p), remainingQuantity(q),
-            side(s), type(t) {
+              OrderType t)
+          : id(std::move(oid)),
+            clientOrderId(std::move(cid)),
+            price(p),
+            remainingQuantity(q),
+            side(s),
+            type(t) {
             setArrivalNow();
         }
 
@@ -95,7 +99,7 @@ namespace tradestack {
          */
         void setArrivalNow() {
             arrivalTime = Clock::now();
-            arrivalNs = static_cast<std::uint64_t>(
+            arrivalNs = static_cast<uint64_t>(
                 chrono::duration_cast<chrono::nanoseconds>(arrivalTime.time_since_epoch()).count());
         }
 
