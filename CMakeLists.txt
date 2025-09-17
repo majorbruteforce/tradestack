@@ -16,6 +16,7 @@ add_executable(tradestack
     src/main.cpp
     src/utils/id_generator.cpp
     src/order.cpp
+    src/network.cpp
 )
 include_directories(include)
 

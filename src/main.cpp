@@ -1,36 +1,21 @@
 #include <iostream>
-#include <order.hpp>
-#include <price_level_node.hpp>
-#include <side_tree.hpp>
 
-int main() {
-    SideTree<PriceLevelNode> st;
+#include "network.hpp"
 
-    Order oA("MCK458", "C245", 10, 25, Side::Buy, OrderType::Limit);
-    Order oB("MCK564", "C325", 20, 16, Side::Buy, OrderType::Limit);
-    Order oC("MCK154", "C226", 30, 32, Side::Buy, OrderType::Limit);
-    Order oD("MCK574", "C386", 30, 32, Side::Buy, OrderType::Limit);
-    Order oE("MCK964", "C455", 30, 32, Side::Buy, OrderType::Limit);
+int main(int argc, char** argv) {
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <port>\n";
+        return 1;
+    }
+    uint16_t port = static_cast<uint16_t>(std::stoi(argv[1]));
 
-    PriceLevelNode* A = st.insert(oA);
-    PriceLevelNode* B = st.insert(oB);
-    PriceLevelNode* C = st.insert(oC);
-
-    st.print();
-    std::cout << std::endl;
-
-    PriceLevelNode* D = st.insert(oD);
-    PriceLevelNode* E = st.insert(oE);
-    st.print();
-    std::cout << std::endl;
-
-    PriceLevelNode* F = st.remove(oA);
-    st.print();
-    std::cout << std::endl;
-
-    PriceLevelNode* G = st.remove(oC);
-    st.print();
-    std::cout << std::endl;
-
+    Server srv(port);
+    if (!srv.start()) {
+        std::cerr << "Failed to start server\n";
+        return 1;
+    }
+    
+    srv.run();
+    srv.stop();
     return 0;
 }
