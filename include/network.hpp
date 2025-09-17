@@ -3,9 +3,11 @@
 #include <unistd.h>
 
 #include <chrono>
+#include <functional>
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 struct Session {
     int                                   fd;
@@ -28,7 +30,9 @@ struct Session {
         }
     }
 };
-
+using Processor = std::function<void(
+        int /*fd*/, std::shared_ptr<Session>& /*session*/, const std::vector<std::string>& /*parts*/
+        )>;
 class Server {
    public:
     Server(uint16_t port, int max_events = 64)
@@ -41,16 +45,26 @@ class Server {
     void run();
 
    private:
-    uint16_t                                port_;
-    int                                     epoll_fd_;
-    int                                     listen_fd_;
-    int                                     max_events_;
-    std::map<int, std::shared_ptr<Session>> sessions_;
+    uint16_t                                   port_;
+    int                                        epoll_fd_;
+    int                                        listen_fd_;
+    int                                        max_events_;
+    std::map<int, std::shared_ptr<Session>>    sessions_;
+    std::unordered_map<std::string, Processor> processors_;
 
     void accept_new();
+    void cleanup_stale();
     bool handle_read(int fd);
     bool handle_write(int fd);
     void modify_epoll_out(int fd, bool enable);
+    
+    void process_session_messages(int fd);
     void remove_session(int fd);
-    void cleanup_stale();
+    void dispatch(const std::string&              cmd,
+                  int                             fd,
+                  std::shared_ptr<Session>&       s,
+                  const std::vector<std::string>& parts);
+    void enqueue_reply(int fd, std::shared_ptr<Session>& s, const std::string& reply);
+    void load_processors();
+    void register_processor(std::string cmd, Processor p);
 };

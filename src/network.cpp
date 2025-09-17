@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+#include <utils/string.hpp>
 #include "network.hpp"
 #include "utils/time.hpp"
 
@@ -26,6 +27,17 @@ int set_nonblocking(int fd) {
     if (flags == -1)
         return -1;
     return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+}
+
+void Server::load_processors() {
+    const std::string PING = "PING";
+
+    register_processor(
+            PING,
+            [this](int fd, std::shared_ptr<Session> &s, const std::vector<std::string> &parts) {
+                (void)parts;
+                enqueue_reply(fd, s, "PONG\n");
+            });
 }
 
 bool Server::start() {
@@ -74,6 +86,8 @@ bool Server::start() {
         perror("epoll_ctl add listen_fd");
         return false;
     }
+
+    load_processors();
 
     std::cout << now_str() << " Server listening on port " << port_ << "\n";
     return true;
@@ -183,7 +197,7 @@ bool Server::handle_read(int fd) {
             s->inbuf.append(buf, buf + n);
             s->touch();
 
-            s->outbuf += "Echo: " + std::string(buf, buf + n);
+            process_session_messages(fd);
         } else if (n == 0) {
             std::cout << now_str() << " fd=" << fd << " closed by peer\n";
             return false;
@@ -218,7 +232,6 @@ bool Server::handle_write(int fd) {
             s->touch();
         } else {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                // socket not writable now
                 break;
             } else if (errno == EINTR) {
                 continue;
@@ -230,7 +243,6 @@ bool Server::handle_write(int fd) {
     }
 
     if (s->outbuf.empty()) {
-        // no more data to write, stop watching for EPOLLOUT
         modify_epoll_out(fd, false);
     }
     return true;
@@ -268,4 +280,51 @@ void Server::cleanup_stale() {
             to_close.push_back(p.first);
     }
     for (int fd : to_close) remove_session(fd);
+}
+
+void Server::process_session_messages(int fd) {
+    auto it = sessions_.find(fd);
+    if (it == sessions_.end())
+        return;
+    auto s = it->second;
+
+    while (true) {
+        auto pos = s->inbuf.find('\n');
+        if (pos == std::string::npos)
+            break;
+        std::string line = s->inbuf.substr(0, pos);
+        s->inbuf.erase(0, pos + 1);
+
+        line = trim(line);
+        if (line.empty())
+            continue;
+
+        auto parts = split_ws(line);
+        if (parts.empty())
+            continue;
+
+        dispatch(parts[0], fd, s, parts);
+    }
+}
+
+void Server::register_processor(std::string cmd, Processor p) {
+    processors_[cmd] = std::move(p);
+}
+
+void Server::dispatch(const std::string              &cmd,
+                      int                             fd,
+                      std::shared_ptr<Session>       &s,
+                      const std::vector<std::string> &parts) {
+    if (parts.empty())
+        return;
+    auto it = processors_.find(cmd);
+    if (it != processors_.end())
+        it->second(fd, s, parts);
+    else
+        enqueue_reply(fd, s, "ERR UNKNOWN_CMD\n");
+}
+
+void Server::enqueue_reply(int fd, std::shared_ptr<Session> &s, const std::string &reply) {
+    s->outbuf += reply;
+    modify_epoll_out(fd, true);
 }
