@@ -16,6 +16,8 @@ struct Session {
     std::chrono::seconds                  timeout;
     std::chrono::steady_clock::time_point last_active;
 
+    bool is_authenticated = false;
+
     Session(int fd_, std::chrono::seconds timeout_)
         : fd(fd_), timeout(timeout_), last_active(std::chrono::steady_clock::now()) {}
 
@@ -31,7 +33,7 @@ struct Session {
     }
 };
 using Processor = std::function<void(
-        int /*fd*/, std::shared_ptr<Session>& /*session*/, const std::vector<std::string>& /*parts*/
+        int /*fd*/, std::shared_ptr<Session>& /*session*/, std::vector<std::string>& /*parts*/
         )>;
 class Server {
    public:
@@ -57,13 +59,13 @@ class Server {
     bool handle_read(int fd);
     bool handle_write(int fd);
     void modify_epoll_out(int fd, bool enable);
-    
+
     void process_session_messages(int fd);
     void remove_session(int fd);
-    void dispatch(const std::string&              cmd,
-                  int                             fd,
-                  std::shared_ptr<Session>&       s,
-                  const std::vector<std::string>& parts);
+    void dispatch(std::string&              cmd,
+                  int                       fd,
+                  std::shared_ptr<Session>& s,
+                  std::vector<std::string>& parts);
     void enqueue_reply(int fd, std::shared_ptr<Session>& s, const std::string& reply);
     void load_processors();
     void register_processor(std::string cmd, Processor p);

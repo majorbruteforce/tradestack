@@ -18,7 +18,6 @@ static inline std::vector<std::string> split_ws(const std::string &s) {
     return out;
 }
 
-static std::string to_upper(std::string s) {
+static void to_upper(std::string& s) {
     std::transform(s.begin(), s.end(), s.begin(), ::toupper);
-    return s;
 }

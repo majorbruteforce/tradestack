@@ -21,6 +21,7 @@
 using namespace std::chrono_literals;
 
 const std::chrono::seconds SESSION_TIMEOUT = 60s;
+const std::string          DEBUG_SECRET    = "123456";
 
 int set_nonblocking(int fd) {
     int flags = fcntl(fd, F_GETFL, 0);
@@ -30,13 +31,45 @@ int set_nonblocking(int fd) {
 }
 
 void Server::load_processors() {
-    const std::string PING = "PING";
+    const std::string PING  = "PING";
+    const std::string DEBUG = "DEBUG";
+
+    const std::string AUTH = "AUTH";
 
     register_processor(
-            PING,
-            [this](int fd, std::shared_ptr<Session> &s, const std::vector<std::string> &parts) {
+            PING, [this](int fd, std::shared_ptr<Session> &s, std::vector<std::string> &parts) {
                 (void)parts;
                 enqueue_reply(fd, s, "PONG\n");
+            });
+
+    register_processor(
+            DEBUG, [&, this](int fd, std::shared_ptr<Session> &s, std::vector<std::string> &parts) {
+                for (auto &p : parts) to_upper(p);
+
+                if (parts.size() >= 3 && parts[1] == "AUTH") {
+                    if (parts[2] == DEBUG_SECRET) {
+                        s->is_authenticated = true;
+                        enqueue_reply(fd, s, "AUTHORIZED\n");
+                    } else {
+                        enqueue_reply(fd, s, "BAD_SECRET\n");
+                    }
+
+                } else if (s->is_authenticated) {
+                    if (parts.size() >= 2 && parts[1] == "LIST") {
+                        std::ostringstream oss;
+                        oss << "At: " << now_str() << "\n";
+                        oss << "Sessions(" << sessions_.size() << ")\n";
+                        for (auto &s : sessions_) {
+                            oss << s.first << " " << "Authenticated: " << s.second->is_authenticated
+                                << "\n";
+                        }
+
+                        enqueue_reply(fd, s, oss.str());
+                    }
+
+                } else {
+                    enqueue_reply(fd, s, "UNAUTHORIZED\n");
+                }
             });
 }
 
@@ -311,12 +344,13 @@ void Server::register_processor(std::string cmd, Processor p) {
     processors_[cmd] = std::move(p);
 }
 
-void Server::dispatch(const std::string              &cmd,
-                      int                             fd,
-                      std::shared_ptr<Session>       &s,
-                      const std::vector<std::string> &parts) {
+void Server::dispatch(std::string              &cmd,
+                      int                       fd,
+                      std::shared_ptr<Session> &s,
+                      std::vector<std::string> &parts) {
     if (parts.empty())
         return;
+    to_upper(cmd);
     auto it = processors_.find(cmd);
     if (it != processors_.end())
         it->second(fd, s, parts);
