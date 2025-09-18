@@ -10,6 +10,7 @@ enum class Side { Buy, Sell };
 
 enum class OrderType { Market, Limit };
 
+using OrderId = uint64_t;
 struct Order {
     using Clock     = std::chrono::steady_clock;
     using TimePoint = std::chrono::time_point<Clock>;
