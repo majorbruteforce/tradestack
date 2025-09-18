@@ -19,6 +19,21 @@ static inline std::vector<std::string> split_ws(const std::string &s) {
     return out;
 }
 
-static void to_upper(std::string& s) {
+static void to_upper(std::string &s) {
     std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+}
+
+static std::string timepoint_to_string(std::chrono::system_clock::time_point tp) {
+    if (tp == std::chrono::system_clock::time_point{})
+        return "none";
+    std::time_t t = std::chrono::system_clock::to_time_t(tp);
+    std::tm     tm;
+#if defined(_WIN32)
+    localtime_s(&tm, &t);
+#else
+    tm = *std::localtime(&t);
+#endif
+    char buf[64];
+    std::strftime(buf, sizeof(buf), "%F %T", &tm);
+    return std::string(buf);
 }

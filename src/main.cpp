@@ -9,12 +9,16 @@ int main(int argc, char** argv) {
     }
     uint16_t port = static_cast<uint16_t>(std::stoi(argv[1]));
 
-    Server srv(port);
+    Server            srv(port);
+    const std::string TSLA = "TSLA";
+
+    srv.manager.new_instrument(TSLA);
+
     if (!srv.start()) {
         std::cerr << "Failed to start server\n";
         return 1;
     }
-    
+
     srv.run();
     srv.stop();
     return 0;

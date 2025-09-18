@@ -33,8 +33,35 @@ void Server::load_processors() {
                         oss << "At: " << now_str() << "\n";
                         oss << "Sessions(" << sessions_.size() << ")\n";
                         for (auto &s : sessions_) {
-                            oss << s.first << " " << "Authenticated: " << s.second->is_authenticated
-                                << "\n";
+                            oss << s.first << " "
+                                << "Authenticated: " << s.second->is_authenticated << "\n";
+                        }
+
+                        enqueue_reply(fd, s, oss.str());
+                    }
+
+                    if (parts.size() >= 2 && parts[1] == "INSTRUMENTS") {
+                        std::ostringstream oss;
+                        oss << "At: " << now_str() << "\n";
+                        oss << "Instruments(" << manager.instruments_.size() << ")\n";
+                        for (auto &i : manager.instruments_) {
+                            oss << "--------------------------------------\n";
+                            oss << i.first << ":\n";
+                            oss << "    "
+                                << "LTP: " << i.second->getLastTradePrice() << "\n";
+                            oss << "    "
+                                << "LTS: " << i.second->getLastTradeSize() << "\n";
+                            oss << "    "
+                                << "LTT: " << i.second->getLastTradeTimestamp() << "\n";
+                            oss << "    "
+                                << "High: " << i.second->getHigh() << "\n";
+                            oss << "    "
+                                << "Low: " << i.second->getLow() << "\n";
+                            oss << "    "
+                                << "Open: " << i.second->getOpen() << "\n";
+                            oss << "    "
+                                << "Close: " << i.second->getClose() << "\n";
+                            oss << "--------------------------------------\n";
                         }
 
                         enqueue_reply(fd, s, oss.str());
@@ -48,7 +75,10 @@ void Server::load_processors() {
     register_processor(
             NEWL, [&](int fd, std::shared_ptr<Session> &s, std::vector<std::string> &parts) {
                 if (parts.size() < 5) {
-                    enqueue_reply(fd, s, "ERR BAD_COMMAND\n USAGE: NEWL <BUY|SELL> <SYMBOL> <QTY> <PRICE>\n");
+                    enqueue_reply(
+                            fd,
+                            s,
+                            "ERR BAD_COMMAND\n USAGE: NEWL <BUY|SELL> <SYMBOL> <QTY> <PRICE>\n");
                     return;
                 }
 

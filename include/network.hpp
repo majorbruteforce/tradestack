@@ -9,6 +9,8 @@
 #include <string>
 #include <unordered_map>
 
+#include "manager.hpp"
+
 struct Session {
     int                                   fd;
     std::string                           inbuf;
@@ -37,6 +39,8 @@ using Processor = std::function<void(
         )>;
 class Server {
    public:
+    Manager manager;
+
     Server(uint16_t port, int max_events = 64)
         : port_(port), epoll_fd_(-1), listen_fd_(-1), max_events_(max_events) {}
 
@@ -47,10 +51,11 @@ class Server {
     void run();
 
    private:
-    uint16_t                                   port_;
-    int                                        epoll_fd_;
-    int                                        listen_fd_;
-    int                                        max_events_;
+    uint16_t port_;
+    int      epoll_fd_;
+    int      listen_fd_;
+    int      max_events_;
+
     std::map<int, std::shared_ptr<Session>>    sessions_;
     std::unordered_map<std::string, Processor> processors_;
 

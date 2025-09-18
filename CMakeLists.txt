@@ -15,7 +15,7 @@ include(CTest)
 add_executable(tradestack
     src/main.cpp
     src/utils/id_generator.cpp
-    src/order.cpp
+    src/manager.cpp
     src/network.cpp
     src/processors.cpp
 )
