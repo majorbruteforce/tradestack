@@ -35,6 +35,14 @@ static bool verify_token(const std::string &token, const std::string &clientId) 
     return true;
 }
 
+int Server::epoll_fd_  = -1;
+int Server::listen_fd_ = -1;
+
+Manager                                         Server::manager;
+std::map<int, std::shared_ptr<Session>>         Server::temp_sessions_;
+std::map<std::string, std::shared_ptr<Session>> Server::sessions_;
+std::unordered_map<std::string, Processor>      Server::processors_;
+
 bool Server::start() {
     listen_fd_ = ::socket(AF_INET, SOCK_STREAM, 0);
     if (listen_fd_ < 0) {

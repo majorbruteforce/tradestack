@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "network.hpp"
+#include "notifier.hpp"
 
 int main(int argc, char** argv) {
     if (argc < 2) {
@@ -13,6 +14,8 @@ int main(int argc, char** argv) {
     const std::string TSLA = "TSLA";
 
     srv.manager.new_instrument(TSLA);
+
+    Notifier::instance().addGroup("F1");
 
     if (!srv.start()) {
         std::cerr << "Failed to start server\n";

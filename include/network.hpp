@@ -44,10 +44,10 @@ using Processor = std::function<void(int /*fd*/,
 
 class Server {
    public:
-    Manager manager;
+    static Manager manager;
 
     Server(uint16_t port, int max_events = 64)
-        : port_(port), epoll_fd_(-1), listen_fd_(-1), max_events_(max_events) {}
+        : port_(port), max_events_(max_events) {}
 
     ~Server() { stop(); }
 
@@ -56,29 +56,31 @@ class Server {
     void run();
 
    private:
-    uint16_t port_;
-    int      epoll_fd_;
-    int      listen_fd_;
-    int      max_events_;
+    uint16_t   port_;
+    int        max_events_;
+    static int epoll_fd_;
+    static int listen_fd_;
 
-    std::map<int, std::shared_ptr<Session>>         temp_sessions_;
-    std::map<std::string, std::shared_ptr<Session>> sessions_;
-    std::unordered_map<std::string, Processor>      processors_;
+    static std::map<int, std::shared_ptr<Session>>         temp_sessions_;
+    static std::map<std::string, std::shared_ptr<Session>> sessions_;
+    static std::unordered_map<std::string, Processor>      processors_;
 
-    void accept_new();
-    void cleanup_stale();
-    bool handle_read(int fd);
-    bool handle_write(int fd);
-    void modify_epoll_out(int fd, bool enable);
+    static void accept_new();
+    static void cleanup_stale();
+    static bool handle_read(int fd);
+    static bool handle_write(int fd);
+    static void modify_epoll_out(int fd, bool enable);
 
-    void process_session_messages(int fd, std::string clientId);
-    void remove_session(int fd);
-    void dispatch(std::string&              cmd,
-                  int                       fd,
-                  std::shared_ptr<Session>& s,
-                  std::vector<std::string>& parts,
-                  std::string               clientId);
-    void enqueue_reply(int fd, std::shared_ptr<Session>& s, const std::string& reply);
-    void load_processors();
-    void register_processor(std::string cmd, Processor p);
+    static void process_session_messages(int fd, std::string clientId);
+    static void remove_session(int fd);
+    static void dispatch(std::string&              cmd,
+                         int                       fd,
+                         std::shared_ptr<Session>& s,
+                         std::vector<std::string>& parts,
+                         std::string               clientId);
+    static void enqueue_reply(int fd, std::shared_ptr<Session>& s, const std::string& reply);
+    static void load_processors();
+    static void register_processor(std::string cmd, Processor p);
+
+    friend class Notifier;
 };

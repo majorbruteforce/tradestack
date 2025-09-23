@@ -1,4 +1,5 @@
 #include "instrument.hpp"
+#include "event_bus.hpp"
 
 void Instrument::placeOrder(Order &order) {
     if(order.side == Side::Buy) {

@@ -1,4 +1,5 @@
 #include "network.hpp"
+#include "notifier.hpp"
 #include "utils/string.hpp"
 #include "utils/time.hpp"
 
@@ -10,21 +11,23 @@ void Server::load_processors() {
     const std::string DEBUG = "DEBUG";
     const std::string NEWL  = "NEWL";
     const std::string AUTH  = "AUTH";
+    const std::string SEND  = "SEND";
+    const std::string SUB   = "SUB";
 
     register_processor(PING,
-                       [this](int                       fd,
-                              std::shared_ptr<Session> &s,
-                              std::vector<std::string> &parts,
-                              std::string               clientId) {
+                       [](int                       fd,
+                          std::shared_ptr<Session> &s,
+                          std::vector<std::string> &parts,
+                          std::string               clientId) {
                            (void)parts;
                            enqueue_reply(fd, s, "PONG\n");
                        });
 
     register_processor(DEBUG,
-                       [&, this](int                       fd,
-                                 std::shared_ptr<Session> &s,
-                                 std::vector<std::string> &parts,
-                                 std::string               clientId) {
+                       [&](int                       fd,
+                           std::shared_ptr<Session> &s,
+                           std::vector<std::string> &parts,
+                           std::string               clientId) {
                            if (parts.size() >= 3 && parts[1] == "AUTH") {
                                if (parts[2] == DEBUG_SECRET) {
                                    s->is_authenticated = true;
@@ -115,8 +118,7 @@ void Server::load_processors() {
                 std::shared_ptr<Session> &s,
                 std::vector<std::string> &parts,
                 std::string               clientId) {
-                
-                if(!s->is_authenticated) {
+                if (!s->is_authenticated) {
                     enqueue_reply(fd, s, "UNAUTHORIZED\n");
                     return;
                 }
@@ -227,4 +229,63 @@ void Server::load_processors() {
 
                 enqueue_reply(fd, s, "OK AUTH\n");
             });
+
+    register_processor(
+            SEND,
+            [&](int                       fd,
+                std::shared_ptr<Session> &s,
+                std::vector<std::string> &parts,
+                std::string               clientId) {
+                if (!s->is_authenticated) {
+                    enqueue_reply(fd, s, "UNAUTHORIZED\n");
+                    return;
+                }
+
+                if (parts.size() < 3) {
+                    enqueue_reply(fd, s, "ERR BAD_COMMAND\nUSAGE: SEND <GROUP_NAME> <MESSAGE>\n");
+                    return;
+                }
+
+                std::string group = parts[1];
+                if (group.empty()) {
+                    enqueue_reply(fd, s, "ERR BAD_COMMAND\nUSAGE: SEND <GROUP_NAME> <MESSAGE>\n");
+                    return;
+                }
+
+                std::string message = parts[2];
+                if (message.empty()) {
+                    enqueue_reply(fd, s, "ERR BAD_COMMAND\nUSAGE: SEND <GROUP_NAME> <MESSAGE>\n");
+                    return;
+                }
+
+                Notifier::instance().notifyGroup(group, message);
+
+                enqueue_reply(fd, s, "MESSAGE SENT");
+            });
+
+    register_processor(SUB,
+                       [&](int                       fd,
+                           std::shared_ptr<Session> &s,
+                           std::vector<std::string> &parts,
+                           std::string               clientId) {
+                           if (!s->is_authenticated) {
+                               enqueue_reply(fd, s, "UNAUTHORIZED\n");
+                               return;
+                           }
+
+                           if (parts.size() < 2) {
+                               enqueue_reply(fd, s, "ERR BAD_COMMAND\nUSAGE: SUB <GROUP_NAME>\n");
+                               return;
+                           }
+
+                           std::string group = parts[1];
+                           if (group.empty()) {
+                               enqueue_reply(fd, s, "ERR BAD_COMMAND\nUSAGE: SUB <GROUP_NAME>\n");
+                               return;
+                           }
+
+                           Notifier::instance().subscribe(group, clientId);
+
+                           enqueue_reply(fd, s, "SUBSCRIEBED");
+                       });
 }

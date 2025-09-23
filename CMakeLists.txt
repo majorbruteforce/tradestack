@@ -19,6 +19,7 @@ add_executable(tradestack
     src/network.cpp
     src/processors.cpp
     src/instrument.cpp
+    src/notifier.cpp
 )
 include_directories(include)
 
