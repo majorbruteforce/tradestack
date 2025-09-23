@@ -3,13 +3,13 @@
 #include "utils/time.hpp"
 
 const std::string DEBUG_SECRET = "123456";
+const std::string EASTER_EGG   = "passkey";
 
 void Server::load_processors() {
     const std::string PING  = "PING";
     const std::string DEBUG = "DEBUG";
     const std::string NEWL  = "NEWL";
-
-    const std::string AUTH = "AUTH";
+    const std::string AUTH  = "AUTH";
 
     register_processor(
             PING, [this](int fd, std::shared_ptr<Session> &s, std::vector<std::string> &parts) {
@@ -34,7 +34,8 @@ void Server::load_processors() {
                         oss << "Sessions(" << sessions_.size() << ")\n";
                         for (auto &s : sessions_) {
                             oss << s.first << " "
-                                << "Authenticated: " << s.second->is_authenticated << "\n";
+                                << "Authenticated: " << s.second->is_authenticated << "\n"
+                                << "Client ID: " << s.second->client_id << "\n";
                         }
 
                         enqueue_reply(fd, s, oss.str());
@@ -137,5 +138,44 @@ void Server::load_processors() {
                 oss << "OK NEWL PARSED " << (no.buy ? "BUY" : "SELL") << " " << no.symbol << " "
                     << no.qty << " " << no.price << "\n";
                 enqueue_reply(fd, s, oss.str());
+            });
+
+    register_processor(
+            AUTH, [&](int fd, std::shared_ptr<Session> &s, std::vector<std::string> &parts) {
+                if (parts.size() < 3) {
+                    enqueue_reply(fd, s, "ERR BAD_COMMAND\nUSAGE: AUTH <PASSKEY> <CLIENTID>\n");
+                    return;
+                }
+
+                std::string passkey  = parts[1];
+                std::string clientId = parts[2];
+
+                if (!iequals(passkey, EASTER_EGG)) {
+                    enqueue_reply(fd, s, "ERR BAD_PASSKEY\n");
+                    return;
+                }
+
+                if (s->is_authenticated) {
+                    if (s->client_id == clientId) {
+                        enqueue_reply(fd, s, "OK AUTH\n");
+                        return;
+                    }
+                    if (!s->client_id.empty()) {
+                        sessions_.erase(s->client_id);
+                    }
+                }
+
+                auto prev = sessions_.find(clientId);
+                if (prev != sessions_.end()) {
+                    if (prev->second->fd != s->fd) {
+                        remove_session(prev->second->fd);
+                    }
+                }
+
+                s->is_authenticated = true;
+                s->client_id        = clientId;
+                sessions_[clientId] = s;
+
+                enqueue_reply(fd, s, "OK AUTH\n");
             });
 }

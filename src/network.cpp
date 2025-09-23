@@ -29,6 +29,12 @@ int set_nonblocking(int fd) {
     return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 
+static bool verify_token(const std::string &token, const std::string &clientId) {
+    (void)token;
+    (void)clientId;
+    return true;
+}
+
 bool Server::start() {
     listen_fd_ = ::socket(AF_INET, SOCK_STREAM, 0);
     if (listen_fd_ < 0) {
@@ -83,6 +89,11 @@ bool Server::start() {
 }
 
 void Server::stop() {
+    for (auto &p : temp_sessions_) {
+        p.second->close_fd();
+    }
+    temp_sessions_.clear();
+
     for (auto &p : sessions_) {
         p.second->close_fd();
     }
@@ -158,8 +169,9 @@ void Server::accept_new() {
         std::cout << now_str() << " Accepted " << ipbuf << ":" << rport << " fd=" << client_fd
                   << "\n";
 
-        auto s               = std::make_shared<Session>(client_fd, SESSION_TIMEOUT);
-        sessions_[client_fd] = s;
+        auto s = std::make_shared<Session>(client_fd, SESSION_TIMEOUT);
+
+        temp_sessions_[client_fd] = s;
 
         epoll_event ev{};
         ev.events  = EPOLLIN;
@@ -167,15 +179,15 @@ void Server::accept_new() {
         if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, client_fd, &ev) < 0) {
             perror("epoll_ctl add client_fd");
             s->close_fd();
-            sessions_.erase(client_fd);
+            temp_sessions_.erase(client_fd);
             continue;
         }
     }
 }
 
 bool Server::handle_read(int fd) {
-    auto it = sessions_.find(fd);
-    if (it == sessions_.end())
+    auto it = temp_sessions_.find(fd);
+    if (it == temp_sessions_.end())
         return false;
 
     auto s = it->second;
@@ -209,8 +221,8 @@ bool Server::handle_read(int fd) {
 }
 
 bool Server::handle_write(int fd) {
-    auto it = sessions_.find(fd);
-    if (it == sessions_.end())
+    auto it = temp_sessions_.find(fd);
+    if (it == temp_sessions_.end())
         return false;
     auto s = it->second;
 
@@ -248,8 +260,8 @@ void Server::modify_epoll_out(int fd, bool enable) {
 }
 
 void Server::remove_session(int fd) {
-    auto it = sessions_.find(fd);
-    if (it == sessions_.end())
+    auto it = temp_sessions_.find(fd);
+    if (it == temp_sessions_.end())
         return;
     auto s = it->second;
     std::cout << now_str() << " Removing session fd=" << fd << "\n";
@@ -258,13 +270,24 @@ void Server::remove_session(int fd) {
         if (errno != ENOENT)
             perror("epoll_ctl del");
     }
+
+    if (s->is_authenticated && !s->client_id.empty()) {
+        auto sit = sessions_.find(s->client_id);
+        if (sit != sessions_.end()) {
+            // only erase if it's the same session object
+            if (sit->second == s) {
+                sessions_.erase(sit);
+            }
+        }
+    }
+
     s->close_fd();
-    sessions_.erase(it);
+    temp_sessions_.erase(it);
 }
 
 void Server::cleanup_stale() {
     std::vector<int> to_close;
-    for (auto &p : sessions_) {
+    for (auto &p : temp_sessions_) {
         if (p.second->is_stale())
             to_close.push_back(p.first);
     }
@@ -272,8 +295,8 @@ void Server::cleanup_stale() {
 }
 
 void Server::process_session_messages(int fd) {
-    auto it = sessions_.find(fd);
-    if (it == sessions_.end())
+    auto it = temp_sessions_.find(fd);
+    if (it == temp_sessions_.end())
         return;
     auto s = it->second;
 
@@ -292,7 +315,13 @@ void Server::process_session_messages(int fd) {
         if (parts.empty())
             continue;
 
-        for (auto &p : parts) to_upper(p);
+        to_upper(parts[0]);
+
+        for (int i = 0; i < parts.size(); i++) {
+            if (i != 0 && iequals(parts[i - 1], "AUTH"))
+                continue;
+            to_upper(parts[i]);
+        }
         dispatch(parts[0], fd, s, parts);
     }
 }

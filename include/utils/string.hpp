@@ -37,3 +37,10 @@ static std::string timepoint_to_string(std::chrono::system_clock::time_point tp)
     std::strftime(buf, sizeof(buf), "%F %T", &tm);
     return std::string(buf);
 }
+
+static auto iequals(const std::string &a, const std::string &b) {
+    if (a.size() != b.size()) return false;
+    for (size_t i = 0; i < a.size(); ++i)
+        if (std::toupper((unsigned char)a[i]) != std::toupper((unsigned char)b[i])) return false;
+    return true;
+};

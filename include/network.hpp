@@ -20,6 +20,8 @@ struct Session {
 
     bool is_authenticated = false;
 
+    std::string client_id;
+
     Session(int fd_, std::chrono::seconds timeout_)
         : fd(fd_), timeout(timeout_), last_active(std::chrono::steady_clock::now()) {}
 
@@ -56,8 +58,9 @@ class Server {
     int      listen_fd_;
     int      max_events_;
 
-    std::map<int, std::shared_ptr<Session>>    sessions_;
-    std::unordered_map<std::string, Processor> processors_;
+    std::map<int, std::shared_ptr<Session>>         temp_sessions_;
+    std::map<std::string, std::shared_ptr<Session>> sessions_;
+    std::unordered_map<std::string, Processor>      processors_;
 
     void accept_new();
     void cleanup_stale();
