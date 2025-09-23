@@ -42,12 +42,16 @@ class Instrument {
     double getLow() const noexcept { return low; }
     double getClose() const noexcept { return close; }
 
+    void placeOrder(Order &order);
+
    private:
     std::string              symbol;
     SideTree<PriceLevelNode> buy_side;
     SideTree<PriceLevelNode> sell_side;
 
     std::unordered_map<OrderId, Order *> order_map;
+
+    std::unordered_map<std::string, std::vector<Order *>> client_orders;
 
     double                                last_trade_price{0.0};
     uint64_t                              last_trade_size{0};

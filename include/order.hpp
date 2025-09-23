@@ -4,7 +4,9 @@
 #include <list>
 #include <string>
 #include <utility>
-#include <utils/print_utils.hpp>
+
+#include "utils/id_generator.hpp"
+#include "utils/print_utils.hpp"
 
 enum class Side { Buy, Sell };
 
@@ -30,9 +32,8 @@ struct Order {
 
     std::list<Order*>::iterator level_posn;
 
-    explicit Order(
-            std::string id, std::string cid, std::uint64_t p, std::uint64_t q, Side s, OrderType t)
-        : id(std::move(id)),
+    explicit Order(std::string cid, double p, int q, Side s, OrderType t)
+        : id(utils::IdGenerator::next()),
           clientOrderId(std::move(cid)),
           price(p),
           remainingQuantity(q),
@@ -73,12 +74,12 @@ struct Order {
 };
 
 struct OrderRequest {
-    std::string   clientOrderId;
-    std::string   symbol;
-    Side          side;
-    OrderType     type;
-    std::uint64_t price;
-    std::uint64_t quantity;
+    std::string clientOrderId;
+    std::string symbol;
+    Side        side;
+    OrderType   type;
+    double      price;
+    int         quantity;
 };
 
 Order* createOrder(const OrderRequest& req);

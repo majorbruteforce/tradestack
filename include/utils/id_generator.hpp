@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <string>
 
 namespace utils {
 /**
@@ -9,6 +10,6 @@ namespace utils {
  */
 class IdGenerator {
    public:
-    static uint64_t next();
+    static std::string next();
 };
 }  // namespace utils

@@ -36,9 +36,12 @@ struct Session {
         }
     }
 };
-using Processor = std::function<void(
-        int /*fd*/, std::shared_ptr<Session>& /*session*/, std::vector<std::string>& /*parts*/
-        )>;
+using Processor = std::function<void(int /*fd*/,
+                                     std::shared_ptr<Session>& /*session*/,
+                                     std::vector<std::string>& /*parts*/,
+                                     std::string /*clientId*/
+                                     )>;
+
 class Server {
    public:
     Manager manager;
@@ -68,12 +71,13 @@ class Server {
     bool handle_write(int fd);
     void modify_epoll_out(int fd, bool enable);
 
-    void process_session_messages(int fd);
+    void process_session_messages(int fd, std::string clientId);
     void remove_session(int fd);
     void dispatch(std::string&              cmd,
                   int                       fd,
                   std::shared_ptr<Session>& s,
-                  std::vector<std::string>& parts);
+                  std::vector<std::string>& parts,
+                  std::string               clientId);
     void enqueue_reply(int fd, std::shared_ptr<Session>& s, const std::string& reply);
     void load_processors();
     void register_processor(std::string cmd, Processor p);

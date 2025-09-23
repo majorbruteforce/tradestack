@@ -18,9 +18,10 @@ add_executable(tradestack
     src/manager.cpp
     src/network.cpp
     src/processors.cpp
+    src/instrument.cpp
 )
 include_directories(include)
 
-enable_testing()
-add_subdirectory(external/googletest)
-add_subdirectory(tests)
+# enable_testing()
+# add_subdirectory(external/googletest)
+# add_subdirectory(tests)

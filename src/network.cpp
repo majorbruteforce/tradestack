@@ -198,7 +198,12 @@ bool Server::handle_read(int fd) {
             s->inbuf.append(buf, buf + n);
             s->touch();
 
-            process_session_messages(fd);
+            std::string clientId = "";
+            if (s->is_authenticated) {
+                clientId = s->client_id;
+            }
+
+            process_session_messages(fd, clientId);
         } else if (n == 0) {
             std::cout << now_str() << " fd=" << fd << " closed by peer\n";
             return false;
@@ -294,7 +299,7 @@ void Server::cleanup_stale() {
     for (int fd : to_close) remove_session(fd);
 }
 
-void Server::process_session_messages(int fd) {
+void Server::process_session_messages(int fd, std::string clientId = "") {
     auto it = temp_sessions_.find(fd);
     if (it == temp_sessions_.end())
         return;
@@ -322,7 +327,7 @@ void Server::process_session_messages(int fd) {
                 continue;
             to_upper(parts[i]);
         }
-        dispatch(parts[0], fd, s, parts);
+        dispatch(parts[0], fd, s, parts, clientId);
     }
 }
 
@@ -333,13 +338,14 @@ void Server::register_processor(std::string cmd, Processor p) {
 void Server::dispatch(std::string              &cmd,
                       int                       fd,
                       std::shared_ptr<Session> &s,
-                      std::vector<std::string> &parts) {
+                      std::vector<std::string> &parts,
+                      std::string               clientId = "") {
     if (parts.empty())
         return;
     to_upper(cmd);
     auto it = processors_.find(cmd);
     if (it != processors_.end())
-        it->second(fd, s, parts);
+        it->second(fd, s, parts, clientId);
     else
         enqueue_reply(fd, s, "ERR UNKNOWN_CMD\n");
 }

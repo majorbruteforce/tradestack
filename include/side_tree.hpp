@@ -30,7 +30,6 @@ class SideTree {
     size_t size() const { return orderCount; }
     bool   empty() const { return orderCount == 0; }
 
-   private:
     virtual void updateRange(NodeType* inserted);
     virtual void recomputeRange(NodeType* root);
 };
