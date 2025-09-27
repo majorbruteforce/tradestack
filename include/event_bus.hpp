@@ -1,12 +1,12 @@
 #pragma once
 #include <functional>
 #include <mutex>
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include <string>
 
 class EventBus {
-public:
+   public:
     using Callback = std::function<void()>;
 
     static EventBus& instance() {
@@ -23,15 +23,18 @@ public:
         std::vector<Callback> copy;
         {
             std::lock_guard<std::mutex> g(mu_);
-            auto it = listeners_.find(topic);
-            if (it == listeners_.end()) return;
+            auto                        it = listeners_.find(topic);
+            if (it == listeners_.end())
+                return;
             copy = it->second;
         }
-        for (auto &cb : copy) if (cb) cb();
+        for (auto& cb : copy)
+            if (cb)
+                cb();
     }
 
-private:
+   private:
     EventBus() = default;
-    std::mutex mu_;
+    std::mutex                                             mu_;
     std::unordered_map<std::string, std::vector<Callback>> listeners_;
 };

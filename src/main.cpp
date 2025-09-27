@@ -15,7 +15,9 @@ int main(int argc, char** argv) {
 
     srv.manager.new_instrument(TSLA);
 
-    Notifier::instance().addGroup("F1");
+    Notifier::instance().addGroup("L1");
+    Notifier::instance().addGroup("L2");
+    Notifier::instance().addGroup("L3");
 
     if (!srv.start()) {
         std::cerr << "Failed to start server\n";

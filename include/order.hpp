@@ -18,7 +18,7 @@ struct Order {
     using TimePoint = std::chrono::time_point<Clock>;
 
     std::string id;
-    std::string clientOrderId;
+    std::string clientId;
 
     std::uint64_t price;
     std::uint64_t remainingQuantity;
@@ -34,7 +34,7 @@ struct Order {
 
     explicit Order(std::string cid, double p, int q, Side s, OrderType t)
         : id(utils::IdGenerator::next()),
-          clientOrderId(std::move(cid)),
+          clientId(std::move(cid)),
           price(p),
           remainingQuantity(q),
           side(s),
@@ -59,11 +59,11 @@ struct Order {
     void setFilledQuantity(std::uint64_t q) { filledQuantity = q; }
     void setSide(Side s) { side = s; }
     void setType(OrderType t) { type = t; }
-    void setClientOrderId(std::string cid) { clientOrderId = std::move(cid); }
+    void setClientId(std::string cid) { clientId = std::move(cid); }
     void setId(std::string oid) { id = std::move(oid); }
 
     [[nodiscard]] const std::string& getId() const { return id; }
-    [[nodiscard]] const std::string& getClientOrderId() const { return clientOrderId; }
+    [[nodiscard]] const std::string& getClientId() const { return clientId; }
     [[nodiscard]] std::uint64_t      getPrice() const { return price; }
     [[nodiscard]] std::uint64_t      getRemainingQuantity() const { return remainingQuantity; }
     [[nodiscard]] std::uint64_t      getFilledQuantity() const { return filledQuantity; }
@@ -74,7 +74,7 @@ struct Order {
 };
 
 struct OrderRequest {
-    std::string clientOrderId;
+    std::string clientId;
     std::string symbol;
     Side        side;
     OrderType   type;
@@ -86,7 +86,7 @@ Order* createOrder(const OrderRequest& req);
 
 inline void printOrder(const Order& ord, std::ostream& os = std::cout, std::size_t width = 15) {
     utils::printField("ID", ord.id, width, os);
-    utils::printField("Client ID", ord.clientOrderId, width, os);
+    utils::printField("Client ID", ord.clientId, width, os);
     utils::printField("Price", ord.price, width, os);
     utils::printField("Filled Qty", ord.filledQuantity, width, os);
     utils::printField("Remaining Qty", ord.remainingQuantity, width, os);
@@ -96,7 +96,7 @@ inline void printOrder(const Order& ord, std::ostream& os = std::cout, std::size
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Order& o) {
-    return os << '{' << "id=" << o.id << ", cid=" << o.clientOrderId << ", price=" << o.price
+    return os << '{' << "id=" << o.id << ", cid=" << o.clientId << ", price=" << o.price
               << ", rem=" << o.remainingQuantity << ", side=" << (o.side == Side::Buy ? "B" : "S")
               << ", type=" << (o.type == OrderType::Limit ? "L" : "M")
               << ", arrivalNs=" << o.getArrivalNs() << '}';

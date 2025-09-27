@@ -46,8 +46,7 @@ class Server {
    public:
     static Manager manager;
 
-    Server(uint16_t port, int max_events = 64)
-        : port_(port), max_events_(max_events) {}
+    Server(uint16_t port, int max_events = 64) : port_(port), max_events_(max_events) {}
 
     ~Server() { stop(); }
 

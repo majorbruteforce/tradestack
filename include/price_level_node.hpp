@@ -3,7 +3,7 @@
 #include <order.hpp>
 
 struct PriceLevelNode {
-    double           price;
+    double             price;
     std::list<Order *> level;
 
     uint64_t        height = 1;

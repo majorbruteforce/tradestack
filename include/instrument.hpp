@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 
 #include "order.hpp"
@@ -42,7 +43,17 @@ class Instrument {
     double getLow() const noexcept { return low; }
     double getClose() const noexcept { return close; }
 
+    void updatePrices(double fillPrice);
+    void fetchPrices(std::string clientId);
+
+    std::vector<Order *> getClientOrders(std::string clientId) {
+        return (client_orders.find(clientId) != client_orders.end()) ? client_orders[clientId]
+                                                                     : std::vector<Order *>();
+    }
+
     void placeOrder(Order &order);
+    void execute_limit_if_match();
+    void execute_market();
 
    private:
     std::string              symbol;
