@@ -17,7 +17,7 @@ class Notifier {
     void unsubscribe(std::string group, std::string clientId);
     void notifyUser(std::string clientId, std::string message);
     void notifyGroup(std::string group, std::string message);
-    void addGroup(std::string group);
+    void registerGroup(std::string group);
     void removeGroup(std::string group);
 
     std::unordered_map<std::string, std::vector<std::string>> groups;

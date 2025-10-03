@@ -43,8 +43,8 @@ class Instrument {
     double getLow() const noexcept { return low; }
     double getClose() const noexcept { return close; }
 
-    void updatePrices(double fillPrice);
-    void fetchPrices(std::string clientId);
+    void updateState(double fillPrice, int qty);
+    void fetchState(std::string clientId);
 
     std::vector<Order *> getClientOrders(std::string clientId) {
         return (client_orders.find(clientId) != client_orders.end()) ? client_orders[clientId]

@@ -11,6 +11,10 @@
   "files.associations": {
     "deque": "cpp",
     "streambuf": "cpp",
-    "system_error": "cpp"
+    "system_error": "cpp",
+    "string": "cpp",
+    "unordered_map": "cpp",
+    "unordered_set": "cpp",
+    "string_view": "cpp"
   }
 }

@@ -13,9 +13,6 @@ void Instrument::placeOrder(Order &order) {
 
 void Instrument::execute_limit_if_match() {
     while (true) {
-        if (!buy_side.high || !sell_side.low)
-            break;
-
         auto buyLevel  = buy_side.high;
         auto sellLevel = sell_side.low;
 
@@ -50,7 +47,7 @@ void Instrument::execute_limit_if_match() {
             sell_side.remove(*bestSellPtr);
         }
 
-        updatePrices(fillPrice);
+        updateState(fillPrice, fillQty);
         last_trade_size = fillQty;
 
         std::ostringstream oss;
@@ -62,7 +59,7 @@ void Instrument::execute_limit_if_match() {
     }
 }
 
-void Instrument::updatePrices(double fillPrice) {
+void Instrument::updateState(double fillPrice, int qty) {
     last_trade_price = fillPrice;
 
     high = std::max(high, last_trade_price);
@@ -72,6 +69,8 @@ void Instrument::updatePrices(double fillPrice) {
         open = last_trade_price;
     }
     close = last_trade_price;
+
+    volume_today += qty;
 
     std::ostringstream oss;
     oss << "F1_UPDATE\n"
@@ -84,7 +83,7 @@ void Instrument::updatePrices(double fillPrice) {
     Notifier::instance().notifyGroup("L1", oss.str());
 }
 
-void Instrument::fetchPrices(std::string clientId) {
+void Instrument::fetchState(std::string clientId) {
     std::ostringstream oss;
     oss << "F1_SNAPSHOT\n"
         << "LTP: " << last_trade_price << "\n"

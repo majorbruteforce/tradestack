@@ -4,7 +4,7 @@
 #include "utils/time.hpp"
 
 const std::string DEBUG_SECRET = "123456";
-const std::string EASTER_EGG   = "passkey";
+const std::string EASTER_EGG   = "pawy";
 
 void Server::load_processors() {
     const std::string PING  = "PING";
@@ -286,6 +286,6 @@ void Server::load_processors() {
 
                            Notifier::instance().subscribe(group, clientId);
 
-                           enqueue_reply(fd, s, "SUBSCRIEBED");
+                           enqueue_reply(fd, s, "SUBSCRIEBED\n");
                        });
 }

@@ -89,7 +89,8 @@ NodeType* SideTree<NodeType>::remove(Order& order) {
     orderCount--;
 
     if (found->level.empty()) {
-        avl.remove(root, price);
+        root = avl.remove(root, price);
+        std::cout << "Price Level Removed\n";
         return nullptr;
     }
 

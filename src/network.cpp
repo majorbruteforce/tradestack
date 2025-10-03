@@ -135,19 +135,28 @@ void Server::run() {
                 accept_new();
             } else {
                 int fd = ev.data.fd;
+
                 if (ev.events & (EPOLLERR | EPOLLHUP)) {
-                    std::cerr << now_str() << " EPOLLERR/HUP on fd " << fd << "\n";
+                    std::cerr << now_str() << " [INFO] Closing session on fd " << fd
+                              << " due to EPOLLERR/HUP (peer closed or socket error)\n";
                     remove_session(fd);
                     continue;
                 }
+
                 if (ev.events & EPOLLIN) {
                     if (!handle_read(fd)) {
+                        std::cerr << now_str() << " [INFO] Closing session on fd " << fd
+                                  << " due to read failure or orderly shutdown (handle_read "
+                                     "returned false)\n";
                         remove_session(fd);
                         continue;
                     }
                 }
+
                 if (ev.events & EPOLLOUT) {
                     if (!handle_write(fd)) {
+                        std::cerr << now_str() << " [INFO] Closing session on fd " << fd
+                                  << " due to write failure (handle_write returned false)\n";
                         remove_session(fd);
                         continue;
                     }
@@ -277,7 +286,7 @@ void Server::remove_session(int fd) {
     if (it == temp_sessions_.end())
         return;
     auto s = it->second;
-    std::cout << now_str() << " Removing session fd=" << fd << "\n";
+    // std::cout << now_str() << " Removing session fd=" << fd << "\n";
 
     if (epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, nullptr) < 0) {
         if (errno != ENOENT)

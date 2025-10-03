@@ -38,7 +38,7 @@ void Notifier::notifyGroup(std::string group, std::string message) {
     }
 }
 
-void Notifier::addGroup(std::string group) {
+void Notifier::registerGroup(std::string group) {
     if (groups.find(group) == groups.end()) {
         groups[group] = {};
     }
